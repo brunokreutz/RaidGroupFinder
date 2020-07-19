@@ -45,9 +45,11 @@ ul {
     padding-top: 15px;
 }
 
+.bg-dark-cyan{
+    background-color: darkcyan;
+}
+
 .bg-main {
-    /*background: rgb(34,193,195);
-    background: linear-gradient(0deg, rgba(34,193,195,1) 0%, rgba(226,0,255,1) 100%);*/
     background-color: darkslateblue;
 }
 
