@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.SignalR.Client
 @using RaidGroupFinder.Data
+@using System.Text.RegularExpressions
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject FixedSizedQueueService FixedSizedQueueService
@@ -54,8 +55,7 @@
     private TrainerCode trainerCode = new TrainerCode();
     private string StatusMessage;
     private string StatusClass;
-
-
+    private static readonly Regex sWhitespace = new Regex(@"\s+");
 
     protected void HandleInvalidSubmit()
     {
@@ -93,17 +93,18 @@
 
     Task Send()
     {
-        if (trainerCode.Value.Length == 12)
-        {
-            trainerCode.Value = $"{trainerCode.Value.Substring(0, 4)} {trainerCode.Value.Substring(4, 4)} {trainerCode.Value.Substring(8, 4)}";
-        }
+        trainerCode.Value = ReplaceWhitespace(trainerCode.Value);
         FixedSizedQueueService.Enqueue(trainerCode.Value);
         return hubConnection.SendAsync("SendMessage", trainerCode.Value);
     }
 
+    private static string ReplaceWhitespace(string input)
+    {
+        return sWhitespace.Replace(input, "");
+    }
 
     public bool IsConnected =>
-        hubConnection.State == HubConnectionState.Connected;
+    hubConnection.State == HubConnectionState.Connected;
 
     public void Dispose()
     {
