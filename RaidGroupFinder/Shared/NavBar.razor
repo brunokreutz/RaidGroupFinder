@@ -1,0 +1,39 @@
+﻿<nav class="navbar navbar-dark bg-dark-cyan">
+    <div class="container">
+        <a class="navbar-brand" href="#" height="32">
+            <img src="/icons/raid-finder-32.png" class="d-inline-block align-top" alt="">
+            Raid Group Finder
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" @onclick="ToggleNavMenu" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="@NavMenuCssClass" id="navbarToggleExternalContent">
+        <div class="p-4">
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item active">
+                    <a class="nav-link" href="">Home <span class="sr-only">(Página atual)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/raid/a">Trainer Codes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/raid/a">Link</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">Desativado</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+@code {
+    bool collapseNavMenu = true;
+
+    string NavMenuCssClass => collapseNavMenu ? "collapse" : "container";
+
+    void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

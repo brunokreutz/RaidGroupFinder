@@ -7,6 +7,13 @@
 @inject FixedSizedQueueService FixedSizedQueueService
 @implements IDisposable
 
+
+<h5 class="ui center aligned header">
+    Pokemon GO Remote Raid Finder<br />
+    Find players to do remote raids with!<br />
+    Add trainers and invite them to raids!<br />
+    Add your trainer code to the list so other pokemon go players can invite you!
+</h5>
 <div class="ui stackable three column grid">
     <div class="column"></div>
     <div class="column">
@@ -77,7 +84,7 @@
             .WithAutomaticReconnect()
             .Build();
 
-        hubConnection.On<string>("ReceiveMessage", (message) =>
+        hubConnection.On<string,string>("ReceiveMessage", (usr, message) =>
         {
             messages.Add(message);
             StateHasChanged();
@@ -95,7 +102,7 @@
     {
         trainerCode.Value = ReplaceWhitespace(trainerCode.Value);
         FixedSizedQueueService.Enqueue(trainerCode.Value);
-        return hubConnection.SendAsync("SendMessage", trainerCode.Value);
+        return hubConnection.SendAsync("SendMessage", "", trainerCode.Value, "1", false);
     }
 
     private static string ReplaceWhitespace(string input)

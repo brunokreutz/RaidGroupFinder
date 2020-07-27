@@ -1,0 +1,64 @@
+﻿@page "/raid/{Room}"
+@using Microsoft.AspNetCore.SignalR.Client
+@using RaidGroupFinder.Data
+@using System.Text.RegularExpressions
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject FixedSizedQueueService FixedSizedQueueService
+@implements IDisposable
+
+<div class="ui padded bg-white">
+    <div class="ui minimal comment form-inline" id="chat">
+        @if (messages != null)
+        {
+            @foreach (var me in messages)
+            {
+                @me.Item1;
+                @me.Item2;
+                <br>
+            }
+    }
+    </div>
+    <input type="text" class="fit" placeholder="Trainer Code" @bind="@message">
+    <button class="ui button teal" disabled="@(!IsConnected)" @onclick="Send">Send</button>
+</div>
+
+@code {
+    [Parameter]
+    public string Room { get; set; }
+    private HubConnection hubConnection;
+    private List<(string,string)> messages = new List<(string,string)>();
+    private string message;
+    private string user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", (usr, message) =>
+        {
+            usr = $"{usr}: ";
+            messages.Add((usr,message));
+            StateHasChanged();
+        });
+
+
+        await hubConnection.StartAsync();
+    }
+
+    protected void Send()
+    {
+        hubConnection.SendAsync("SendMessage", user, message, Room, false);
+    }
+
+    public bool IsConnected =>
+    hubConnection.State == HubConnectionState.Connected;
+
+    public void Dispose()
+    {
+        _ = hubConnection.DisposeAsync();
+    }
+}
