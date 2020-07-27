@@ -5,8 +5,6 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject FixedSizedQueueService FixedSizedQueueService
-@implements IDisposable
-
 
 <h5 class="ui center aligned header">
     Pokemon GO Remote Raid Finder<br />
@@ -31,90 +29,6 @@
                     </div>
                 </div>
             </div>
-            <div class="ui padded grid sixteen wide column">
-                <div class="@StatusClass">@StatusMessage</div>
-                <EditForm model="@trainerCode" class="ui fluid action input" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
-                    <DataAnnotationsValidator />
-                    @*<ValidationSummary />*@
-                    <input type="text" maxlength="14" class="fit" placeholder="Trainer Code" @bind="trainerCode.Value">
-                    <button class="ui button teal" disabled="@(!IsConnected)">Join the list</button>
-                </EditForm>
-                <div class="ui minimal comments">
-                    <h4 class="ui dividing header">
-                        Trainer Codes List (Most Recent):
-                    </h4>
-                    @if (messages != null)
-                    {
-                        for (int j = messages.Count - 1; j >= 0; j--)
-                        {
-                            <CopyToClipboard Text="@messages[j]"></CopyToClipboard>
-                        }
-                    }
-                </div>
-            </div>
         </div>
     </div>
 </div>
-
-@code {
-    private HubConnection hubConnection;
-    private List<string> messages = new List<string>();
-    private TrainerCode trainerCode = new TrainerCode();
-    private string StatusMessage;
-    private string StatusClass;
-    private static readonly Regex sWhitespace = new Regex(@"\s+");
-
-    protected void HandleInvalidSubmit()
-    {
-        StatusClass = "text-danger";
-        StatusMessage = "Invalid Trainer Code";
-    }
-
-    protected void HandleValidSubmit()
-    {
-        StatusClass = "";
-        StatusMessage = "";
-        Send();
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
-            .WithAutomaticReconnect()
-            .Build();
-
-        hubConnection.On<string,string>("ReceiveMessage", (usr, message) =>
-        {
-            messages.Add(message);
-            StateHasChanged();
-        });
-
-        await hubConnection.StartAsync();
-
-        var history = await FixedSizedQueueService.GetQueue();
-
-        foreach (var message in history)
-            messages.Add(message);
-    }
-
-    Task Send()
-    {
-        trainerCode.Value = ReplaceWhitespace(trainerCode.Value);
-        FixedSizedQueueService.Enqueue(trainerCode.Value);
-        return hubConnection.SendAsync("SendMessage", "", trainerCode.Value, "1", false);
-    }
-
-    private static string ReplaceWhitespace(string input)
-    {
-        return sWhitespace.Replace(input, "");
-    }
-
-    public bool IsConnected =>
-    hubConnection.State == HubConnectionState.Connected;
-
-    public void Dispose()
-    {
-        _ = hubConnection.DisposeAsync();
-    }
-}
