@@ -1,4 +1,6 @@
-﻿@page "/raid/{Room}"
+﻿@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@page "/raid/{Room}"
 @using Microsoft.AspNetCore.SignalR.Client
 @using RaidGroupFinder.Data
 @using System.Text.RegularExpressions
@@ -11,13 +13,13 @@
     <div class="ui minimal comment form-inline" id="chat">
         @if (messages != null)
         {
-            @foreach (var me in messages)
+        @foreach (var me in messages)
             {
-                @me.Item1;
-                @me.Item2;
-                <br>
+        @me.Item1;
+        @me.Item2;
+        <br>
             }
-    }
+        }
     </div>
     <input type="text" class="fit" placeholder="Trainer Code" @bind="@message">
     <button class="ui button teal" disabled="@(!IsConnected)" @onclick="Send">Send</button>
@@ -27,7 +29,7 @@
     [Parameter]
     public string Room { get; set; }
     private HubConnection hubConnection;
-    private List<(string,string)> messages = new List<(string,string)>();
+    private List<(string, string)> messages = new List<(string, string)>();
     private string message;
     private string user;
 
@@ -41,7 +43,7 @@
         hubConnection.On<string, string>("ReceiveMessage", (usr, message) =>
         {
             usr = $"{usr}: ";
-            messages.Add((usr,message));
+            messages.Add((usr, message));
             StateHasChanged();
         });
 

@@ -9,23 +9,22 @@
         </button>
     </div>
     <div class="@NavMenuCssClass" id="navbarToggleExternalContent">
-        <div class="p-4">
-            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-                <li class="nav-item active">
-                    <a class="nav-link" href="">Home <span class="sr-only">(Página atual)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/trainer-codes-list">Trainer Codes List</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/raid/a">Link</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#">Desativado</a>
-                </li>
-            </ul>
-        </div>
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+                <a class="nav-link" href="">Home <span class="sr-only">(Página atual)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/trainer-codes-list">Trainer Codes List</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/raid/a">Link</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#">Desativado</a>
+            </li>
+        </ul>
     </div>
+    <LoginDisplay></LoginDisplay>
 </nav>
 @code {
     bool collapseNavMenu = true;

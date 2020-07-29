@@ -4,6 +4,12 @@
 @{
     Layout = null;
 }
+@*@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+
+@var tokens = new InitialApplicationState
+{
+    XsrfToken = Xsrf.GetAndStoreTokens(HttpContext).RequestToken
+}*@
 
 <!DOCTYPE html>
 <html lang="en">
