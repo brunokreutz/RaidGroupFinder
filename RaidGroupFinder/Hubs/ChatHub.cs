@@ -16,17 +16,15 @@ namespace BlazorSignalRApp.Server.Hubs
 
         public async Task SendMessage(string user, string message, string room, bool join)
         {
-            //if (join)
-            //{
+            if (join)
+            {
                 await JoinRoom(room).ConfigureAwait(false);
-            //    await Clients.Group(room).SendAsync("ReceiveMessage", user, " joined to " + room).ConfigureAwait(true);
-
-            //}
-            //else
-            //{
-                await Clients.Group(room).SendAsync("ReceiveMessage", user, message).ConfigureAwait(true);
-
-            //}
+                await Clients.Group(room).SendAsync("ReceiveMessage", "BOT", $"{user} joined the raid room.", DateTime.Now).ConfigureAwait(true);
+            }
+            else
+            {
+                await Clients.Group(room).SendAsync("ReceiveMessage", user, message, DateTime.Now).ConfigureAwait(true);
+            }
         }
 
         public Task JoinRoom(string roomName)

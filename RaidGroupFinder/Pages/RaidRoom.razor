@@ -1,66 +1,95 @@
-﻿@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
-@page "/raid/{Room}"
+﻿@page "/raid/{Room}"
 @using Microsoft.AspNetCore.SignalR.Client
 @using RaidGroupFinder.Data
 @using System.Text.RegularExpressions
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Microsoft.AspNetCore.Identity;
+@inject UserManager<ApplicationUser> UserManager;
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject FixedSizedQueueService FixedSizedQueueService
 @implements IDisposable
 
-<div class="ui padded bg-white">
-    <div class="ui minimal comment form-inline" id="chat">
-        @if (messages != null)
-        {
-        @foreach (var me in messages)
-            {
-        @me.Item1;
-        @me.Item2;
-        <br>
-            }
-        }
-    </div>
-    <input type="text" class="fit" placeholder="Trainer Code" @bind="@message">
-    <button class="ui button teal" disabled="@(!IsConnected)" @onclick="Send">Send</button>
-</div>
+<AuthorizeView>
+    <NotAuthorized>
+        <h2>You need to <a href="Identity/Account/Login">Login</a> first</h2>
+    </NotAuthorized>
+    <Authorized>
+        <div class="ui padded bg-white">
+            <div class="ui minimal comments" id="chat">
+                @if (Messages != null)
+                {
+                    @foreach (var me in Messages)
+                    {
+                        <div class="comment">
+                            <div class="content">
+                                <a class="author"> @me.Item1</a>
+                                <div class="metadata">
+                                    <span class="date">@me.Item3.ToLocalTime()</span>
+                                </div>
+                                <div class="text">
+                                    @me.Item2 
+                                </div>
+                            </div>
+                        </div>                    
+                    }
+                }
+            </div>
+            <input type="text" class="fit" placeholder="Trainer Code" @bind="@Message">
+            <button class="ui button teal" disabled="@(!IsConnected)" @onclick="Send">Send</button>
+        </div>
+</Authorized>
+</AuthorizeView>
 
 @code {
     [Parameter]
     public string Room { get; set; }
-    private HubConnection hubConnection;
-    private List<(string, string)> messages = new List<(string, string)>();
-    private string message;
-    private string user;
+
+    private HubConnection HubConnection;
+    private List<(string, string, DateTime)> Messages = new List<(string, string, DateTime)>();
+    private string Message;
+    private string User;
+
+
 
     protected override async Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder()
+        HubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
             .WithAutomaticReconnect()
             .Build();
 
-        hubConnection.On<string, string>("ReceiveMessage", (usr, message) =>
+        HubConnection.On<string, string, DateTime>("ReceiveMessage", (usr, message, date) =>
         {
-            usr = $"{usr}: ";
-            messages.Add((usr, message));
-            StateHasChanged();
+            Messages.Add((usr, message, date));
+            base.StateHasChanged();
         });
 
+        await HubConnection.StartAsync();
 
-        await hubConnection.StartAsync();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var currentUser = await UserManager.GetUserAsync(user);
+            User = currentUser.PokemonGoNickname;
+        }
+
+        await HubConnection.SendAsync("SendMessage", User, Message, Room, true);
+
     }
 
     protected void Send()
     {
-        hubConnection.SendAsync("SendMessage", user, message, Room, false);
+        HubConnection.SendAsync("SendMessage", User, Message, Room, false);
     }
 
     public bool IsConnected =>
-    hubConnection.State == HubConnectionState.Connected;
+    HubConnection.State == HubConnectionState.Connected;
 
     public void Dispose()
     {
-        _ = hubConnection.DisposeAsync();
+        _ = HubConnection.DisposeAsync();
     }
 }

@@ -10,7 +10,7 @@ a, .btn-link {
     color: #0366d6;
 }
 
-.form-inline#chat {
+.comments#chat {
     /*height: -moz-calc(100% - (20px + 30px));
     height: -webkit-calc(100% - (20px + 30px));
     height: calc(100% - (20px + 30px));*/
@@ -18,6 +18,12 @@ a, .btn-link {
     align-items: flex-end;
     overflow-y: scroll;
     max-height: calc(100vh - 140px );
+    margin: unset;
+    max-width: none;
+}
+
+.comment{
+    padding-top : 2px;
 }
 
 ul {

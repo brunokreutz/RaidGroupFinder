@@ -10,84 +10,94 @@ using RaidGroupFinder.Data;
 
 namespace RaidGroupFinder.Areas.Identity.Pages.Account.Manage
 {
+    
     public class SetPasswordModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-
-        public SetPasswordModel(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+        public IActionResult OnGet()
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
+            return RedirectToPage("Login");
         }
 
-        [BindProperty]
-        public InputModel Input { get; set; }
-
-        [TempData]
-        public string StatusMessage { get; set; }
-
-        public class InputModel
+        public IActionResult OnPost()
         {
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            [Display(Name = "New password")]
-            public string NewPassword { get; set; }
-
-            [DataType(DataType.Password)]
-            [Display(Name = "Confirm new password")]
-            [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
+            return RedirectToPage("Login");
         }
+        //    private readonly UserManager<ApplicationUser> _userManager;
+        //    private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public async Task<IActionResult> OnGetAsync()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
+        //    public SetPasswordModel(
+        //        UserManager<ApplicationUser> userManager,
+        //        SignInManager<ApplicationUser> signInManager)
+        //    {
+        //        _userManager = userManager;
+        //        _signInManager = signInManager;
+        //    }
 
-            var hasPassword = await _userManager.HasPasswordAsync(user);
+        //    [BindProperty]
+        //    public InputModel Input { get; set; }
 
-            if (hasPassword)
-            {
-                return RedirectToPage("./ChangePassword");
-            }
+        //    [TempData]
+        //    public string StatusMessage { get; set; }
 
-            return Page();
-        }
+        //    public class InputModel
+        //    {
+        //        [Required]
+        //        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        //        [DataType(DataType.Password)]
+        //        [Display(Name = "New password")]
+        //        public string NewPassword { get; set; }
 
-        public async Task<IActionResult> OnPostAsync()
-        {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
+        //        [DataType(DataType.Password)]
+        //        [Display(Name = "Confirm new password")]
+        //        [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
+        //        public string ConfirmPassword { get; set; }
+        //    }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
+        //    public async Task<IActionResult> OnGetAsync()
+        //    {
+        //        var user = await _userManager.GetUserAsync(User);
+        //        if (user == null)
+        //        {
+        //            return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+        //        }
 
-            var addPasswordResult = await _userManager.AddPasswordAsync(user, Input.NewPassword);
-            if (!addPasswordResult.Succeeded)
-            {
-                foreach (var error in addPasswordResult.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                return Page();
-            }
+        //        var hasPassword = await _userManager.HasPasswordAsync(user);
 
-            await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your password has been set.";
+        //        if (hasPassword)
+        //        {
+        //            return RedirectToPage("./ChangePassword");
+        //        }
 
-            return RedirectToPage();
-        }
+        //        return Page();
+        //    }
+
+        //    public async Task<IActionResult> OnPostAsync()
+        //    {
+        //        if (!ModelState.IsValid)
+        //        {
+        //            return Page();
+        //        }
+
+        //        var user = await _userManager.GetUserAsync(User);
+        //        if (user == null)
+        //        {
+        //            return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+        //        }
+
+        //        var addPasswordResult = await _userManager.AddPasswordAsync(user, Input.NewPassword);
+        //        if (!addPasswordResult.Succeeded)
+        //        {
+        //            foreach (var error in addPasswordResult.Errors)
+        //            {
+        //                ModelState.AddModelError(string.Empty, error.Description);
+        //            }
+        //            return Page();
+        //        }
+
+        //        await _signInManager.RefreshSignInAsync(user);
+        //        StatusMessage = "Your password has been set.";
+
+        //        return RedirectToPage();
+        //    }
     }
 }

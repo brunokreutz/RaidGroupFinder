@@ -152,7 +152,7 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account
                             var result3 = await _userManager.ConfirmEmailAsync(user, code);
                             await _signInManager.SignInAsync(user, isPersistent: false, info2.LoginProvider);
 
-                            return LocalRedirect(returnUrl);
+                            return RedirectToPage("./EditUserInformation");
                         }
                     }
                     foreach (var error in result2.Errors)

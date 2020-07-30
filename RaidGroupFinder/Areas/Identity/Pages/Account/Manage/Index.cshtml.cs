@@ -30,24 +30,24 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account.Manage
 
         [BindProperty]
         public InputModel Input { get; set; }
-
         public class InputModel
         {
-            [Phone]
-            [Display(Name = "Phone number")]
-            public string PhoneNumber { get; set; }
+            [Required]
+            public string TrainerCode { get; set; }
+            [Required]
+            public string PokemonGoNickname { get; set; }
         }
 
         private async Task LoadAsync(ApplicationUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
             Username = userName;
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PokemonGoNickname = user.PokemonGoNickname,
+                TrainerCode = user.TrainerCode
             };
         }
 
@@ -77,11 +77,12 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            if (Input.PhoneNumber != phoneNumber)
+            if (Input.TrainerCode != user.TrainerCode || Input.PokemonGoNickname != user.PokemonGoNickname)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-                if (!setPhoneResult.Succeeded)
+                user.PokemonGoNickname = Input.PokemonGoNickname;
+                user.TrainerCode = Input.TrainerCode;
+                var result = await _userManager.UpdateAsync(user);
+                if (!result.Succeeded)
                 {
                     StatusMessage = "Unexpected error when trying to set phone number.";
                     return RedirectToPage();
