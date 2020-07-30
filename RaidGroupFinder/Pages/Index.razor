@@ -3,38 +3,25 @@
 @using RaidGroupFinder.Data
 @using System.Text.RegularExpressions
 @inject IJSRuntime JSRuntime
-@inject NavigationManager NavigationManager
-@inject FixedSizedQueueService FixedSizedQueueService
 
-<h5 class="ui center aligned header">
-    Pokemon GO Remote Raid Finder<br />
-    Find players to do remote raids with!<br />
-    Add trainers and invite them to raids!<br />
-    Add your trainer code to the list so other pokemon go players can invite you!
-</h5>
+<MainMessage></MainMessage>
 <div class="two ui buttons">
     <button class="ui orange button">Host a Raid</button>
-    <button class="ui teal button"><a href="/trainer-codes-list">Tainer Codes List</a></button>
+    <button class="ui btn-primary button">Tainer Codes List</button>
 </div>
-<div class="ui stackable three column grid">
-    <div class="column"></div>
-    <div class="column">
-        <a href="raid/a">
-            <div class="ui grid bg-white">
-                <img src="/icons/kyurem_tiny.png" class="five wide column bg-img">
-                <div class="bg-indianred eleven wide column">
-                    <div class="header">
-                        <a class="text-white text-xl-left">Kyurem</a>
-                        <div class="float-right">
-                            <img src="/icons/raid-icon.png" class="raid-icon" />
-                            <img src="/icons/raid-icon.png" class="raid-icon" />
-                            <img src="/icons/raid-icon.png" class="raid-icon" />
-                            <img src="/icons/raid-icon.png" class="raid-icon" />
-                            <img src="/icons/raid-icon.png" class="raid-icon" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
+<div class="ui stackable two column grid">
+    <div class="column text-white">
+        <h3> Active Raids</h3>
+        <RaidCard></RaidCard>
+        <RaidCard></RaidCard>
+        <RaidCard></RaidCard>
+    </div>
+    <div class="column text-white">
+        <h3> Last Raids</h3>
+        <RaidCard></RaidCard>
+        <RaidCard></RaidCard>
     </div>
 </div>
+
+@code{
+}

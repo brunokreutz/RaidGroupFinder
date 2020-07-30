@@ -7,42 +7,29 @@
 @inject FixedSizedQueueService FixedSizedQueueService
 @implements IDisposable
 
-
-<h5 class="ui center aligned header">
-    Pokemon GO Remote Raid Finder<br />
-    Find players to do remote raids with!<br />
-    Add trainers and invite them to raids!<br />
-    Add your trainer code to the list so other pokemon go players can invite you!
-</h5>
-<div class="ui stackable three column grid">
-    <div class="column"></div>
-    <div class="column">
-        <div class="ui grid bg-white">
-            <div class="ui padded grid sixteen wide column">
-                <div class="@StatusClass">@StatusMessage</div>
-                <EditForm model="@trainerCode" class="ui fluid action input" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
-                    <DataAnnotationsValidator />
-                    @*<ValidationSummary />*@
-                    <input type="text" maxlength="14" class="fit" placeholder="Trainer Code" @bind="trainerCode.Value">
-                    <button class="ui button teal" disabled="@(!IsConnected)">Join the list</button>
-                </EditForm>
-                <div class="ui minimal comments">
-                    <h4 class="ui dividing header">
-                        Trainer Codes List (Most Recent):
-                    </h4>
-                    @if (messages != null)
-                    {
-                        for (int j = messages.Count - 1; j >= 0; j--)
-                        {
-                            <CopyToClipboard Text="@messages[j]"></CopyToClipboard>
-                        }
-                    }
-                </div>
-            </div>
-        </div>
+<MainMessage></MainMessage>
+<div class="container">
+    <div class="@StatusClass">@StatusMessage</div>
+    <EditForm model="@trainerCode" class="ui fluid action input" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+        <DataAnnotationsValidator />
+        @*<ValidationSummary />*@
+        <input type="text" maxlength="14" class="fit" placeholder="Trainer Code" @bind="trainerCode.Value">
+        <button class="ui button btn-primary" disabled="@(!IsConnected)">Join the list</button>
+    </EditForm>
+    <div class="ui minimal comments">
+        <h4 class="ui dividing header">
+            Trainer Codes List (Most Recent):
+        </h4>
+        @if (messages != null)
+        {
+            for (int j = messages.Count - 1; j >= 0; j--)
+            {
+                <CopyToClipboard Text="@messages[j]"></CopyToClipboard>
+            }
+        }
     </div>
 </div>
-
+            
 @code {
     private HubConnection hubConnection;
     private List<string> messages = new List<string>();

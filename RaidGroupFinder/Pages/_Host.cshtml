@@ -1,65 +1,40 @@
 ﻿@page "/"
 @namespace RaidGroupFinder.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.AspNetCore.Mvc.ViewEngines
+@inject IWebHostEnvironment Environment
+@inject ICompositeViewEngine Engine
+@using RaidGroupFinder.Shared
 @{
-    Layout = null;
+    Layout = "_Layout";
 }
-@*@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 
-@var tokens = new InitialApplicationState
-{
-    XsrfToken = Xsrf.GetAndStoreTokens(HttpContext).RequestToken
-}*@
+<app>
+    <component type="typeof(App)" render-mode="ServerPrerendered" />
+</app>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Raid Group Finder</title>
-    <base href="~/" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link href="css/site.css" rel="stylesheet" />
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-172953101-1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
+<div id="blazor-error-ui">
+    <environment include="Staging,Production">
+        An error has occurred. This application may no longer respond until reloaded.
+    </environment>
+    <environment include="Development">
+        An unhandled exception has occurred. See browser dev tools for details.
+    </environment>
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
 
-        gtag('config', 'UA-172953101-1');
-    </script>
-</head>
-<body class="bg-main">
-    <app>
-        <component type="typeof(App)" render-mode="ServerPrerendered" />
-    </app>
-
-    <div id="blazor-error-ui">
-        <environment include="Staging,Production">
-            An error has occurred. This application may no longer respond until reloaded.
-        </environment>
-        <environment include="Development">
-            An unhandled exception has occurred. See browser dev tools for details.
-        </environment>
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
-    </div>
-
-    <script>
-        window.clipboardCopy = {
-            copyText: function (text) {
-                navigator.clipboard.writeText(text).then(function () {
-                    alert("Copied to clipboard!");
-                })
-                    .catch(function (error) {
-                        alert(error);
-                    });
-            }
-        };
-    </script>
-    <script src="_framework/blazor.server.js"></script>
-</body>
-</html>
+<script>
+    window.clipboardCopy = {
+        copyText: function (text) {
+            navigator.clipboard.writeText(text).then(function () {
+                alert("Copied to clipboard!");
+            })
+                .catch(function (error) {
+                    alert(error);
+                });
+        }
+    };
+</script>
+@*<script src="_framework/blazor.server.js"></script>*@

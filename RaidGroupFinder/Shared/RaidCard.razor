@@ -1,0 +1,30 @@
+﻿@inject NavigationManager NavigationManager
+
+<div class="ui grid bg-indianred raid-card" @onclick="JoinRoom">
+    <img src="/icons/kyurem_tiny.png" class="six wide column bg-img">
+    <div class="eight wide column">
+        <div class="header">
+            <div>
+                <img src="/icons/raid-icon-34.png" class="raid-icon" />
+                <img src="/icons/raid-icon-34.png" class="raid-icon" />
+                <img src="/icons/raid-icon-34.png" class="raid-icon" />
+                <img src="/icons/raid-icon-34.png" class="raid-icon" />
+                <img src="/icons/raid-icon-34.png" class="raid-icon" />
+            </div>
+            <div class="text-white text-xl-left">Chesnaught</div>
+            <div class="text-white">Host: PokemongoN</div>
+            <div class="text-white">End time: @DateTime.Now.ToLocalTime().ToShortTimeString()</div>
+            <div class="text-white">Players: (1/6)</div>
+        </div>
+    </div>
+    <div class="two wide column d-flex align-items-center">
+        <img src="/icons/next-24.svg" />
+    </div>
+</div>
+@code {
+
+    void JoinRoom()
+    {
+        NavigationManager.NavigateTo("raid/a");
+    }
+}

@@ -1,5 +1,7 @@
-@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+@import url('bootstrap/bootstrap.min.css');
 @import url('semanticui/semantic.min.css');
+
+$primary: purple;
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -22,8 +24,8 @@ a, .btn-link {
     max-width: none;
 }
 
-.comment{
-    padding-top : 2px;
+.ui.comments .comment{
+    padding: 0;
 }
 
 ul {
@@ -34,6 +36,20 @@ ul {
     max-height: 20px;
 }
 
+.accent {
+    color: #719CD1;
+}
+.bg-accent {
+    background-color: #719CD1;
+}
+
+.bg-dark-blue {
+    background-color: #191C2F;
+}
+
+.bg-nav {
+    background-color: #6610F2;
+}
 
 .bg-indianred{
     background-color: indianred;
@@ -60,10 +76,14 @@ ul {
 
 .bg-img {
     background: radial-gradient(#ffa2a2, #a7132e);
+    min-width: 96px;
+}
+
+.raid-card{
+    min-width: 320px;
 }
 
 .padding-top-15{
-    background-color:rgb(255,255,255,0.9);
     padding-top: 15px;
 }
 
@@ -77,8 +97,14 @@ ul {
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: #6610f2;
+    border-color: #6610f2;
+}
+
+.button.btn-primary {
+    color: #fff;
+    background-color: #6610f2;
+    border-color: #6610f2;
 }
 
 .btn-cpy {
@@ -89,6 +115,10 @@ app {
     position: relative;
     display: flex;
     flex-direction: column;
+}
+
+hr{
+    background-color:white;
 }
 
 .top-row {
@@ -167,8 +197,39 @@ app {
     font-family: 'Roboto',arial,sans-serif;
 }
 
+.t-green{
+    color: green!important;
+}
+
+.t-red {
+    color: red!important;
+}
+
+.t-orange {
+    color: orangered!important;
+}
+
+.t-blue {
+    color: dodgerblue!important;
+}
+
+.t-yellowgreen {
+    color: yellowgreen!important;
+}
+
+.t-violet {
+    color: mediumvioletred!important;
+}
+
+.t-chocolate {
+    color: chocolate!important;
+}
+
+
+
+
 .content {
-    padding-top: 1.1rem;
+    padding-top: .3rem;
 }
 
 .valid.modified:not([type=checkbox]) {
@@ -202,6 +263,15 @@ app {
     top: 0.5rem;
 }
 
+.ui.grid{
+    margin: 0px;
+    padding: 0px;
+}
+
+.ui.grid + .grid {
+    margin-top: .2rem;
+}
+
 @media (max-width: 767.98px) {
     .main .top-row:not(.auth) {
         display: none;
@@ -214,12 +284,13 @@ app {
     .main .top-row a, .main .top-row .btn-link {
         margin-left: 0;
     }
+
+    .ui.stackable.grid > .column:not(.row){
+        padding : 0!important;
+    }
 }
 
 @media (min-width: 768px) {
-    app {
-        flex-direction: row;
-    }
 
     .sidebar {
         width: 250px;

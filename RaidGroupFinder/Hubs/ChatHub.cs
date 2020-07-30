@@ -18,8 +18,9 @@ namespace BlazorSignalRApp.Server.Hubs
         {
             if (join)
             {
+                var splits = user.Split(" |");
                 await JoinRoom(room).ConfigureAwait(false);
-                await Clients.Group(room).SendAsync("ReceiveMessage", "BOT", $"{user} joined the raid room.", DateTime.Now).ConfigureAwait(true);
+                await Clients.Group(room).SendAsync("ReceiveMessage", "BOT", $"{splits.First()}, trainer code:{splits.Last()} joined the raid room.", DateTime.Now).ConfigureAwait(true);
             }
             else
             {

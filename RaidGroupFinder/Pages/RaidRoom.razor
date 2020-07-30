@@ -12,45 +12,46 @@
 
 <AuthorizeView>
     <NotAuthorized>
-        <h2>You need to <a href="Identity/Account/Login">Login</a> first</h2>
+        <h2 class="text-white">You need to <a href="Identity/Account/Login">Login</a> first</h2>
     </NotAuthorized>
     <Authorized>
-        <div class="ui padded bg-white">
-            <div class="ui minimal comments" id="chat">
-                @if (Messages != null)
+        <div class="ui minimal comments" id="chat">
+            @if (Messages != null)
+            {
+                @foreach (var me in Messages)
                 {
-                    @foreach (var me in Messages)
-                    {
-                        <div class="comment">
-                            <div class="content">
-                                <a class="author"> @me.Item1</a>
-                                <div class="metadata">
-                                    <span class="date">@me.Item3.ToLocalTime()</span>
-                                </div>
-                                <div class="text">
-                                    @me.Item2 
-                                </div>
+                    var color = UserColor.GetValueOrDefault(me.Item1);
+                    <div class="comment">
+                        <div class="content">
+                            <div class="d-inline author @color"> @me.Item1</div>
+                            <div class="metadata">
+                                <span class="date text-white-50">@me.Item3.ToLocalTime()</span>
                             </div>
-                        </div>                    
-                    }
+                            <div class="text text-white">
+                                @me.Item2 
+                            </div>
+                        </div>
+                    </div>                    
                 }
-            </div>
-            <input type="text" class="fit" placeholder="Trainer Code" @bind="@Message">
-            <button class="ui button teal" disabled="@(!IsConnected)" @onclick="Send">Send</button>
+            }
+        </div>
+        <div class="form-group fit d-flex">
+            <input class="form-control" type="text" placeholder="Coordinate the raid" @bind="@Message">
+            <button type="submit" class="btn btn-primary" disabled="@(!IsConnected)" @onclick="Send">Send</button>
         </div>
 </Authorized>
 </AuthorizeView>
 
 @code {
-    [Parameter]
-    public string Room { get; set; }
+        [Parameter]
+        public string Room { get; set; }
 
     private HubConnection HubConnection;
     private List<(string, string, DateTime)> Messages = new List<(string, string, DateTime)>();
     private string Message;
     private string User;
-
-
+    private List<string> Colors = new List<string>() { "t-red", "t-orange", "t-blue", "t-yellowgreen", "t-violet", "t-chocolate" };
+    private Dictionary<string,string> UserColor = new Dictionary<string, string>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -59,8 +60,17 @@
             .WithAutomaticReconnect()
             .Build();
 
+        UserColor.Add("BOT", "t-green");
+        var count = 0;
+
         HubConnection.On<string, string, DateTime>("ReceiveMessage", (usr, message, date) =>
         {
+            if (usr != "BOT")
+            {
+                UserColor.Add(usr, Colors[count % 6]);
+                count++;
+            }
+
             Messages.Add((usr, message, date));
             base.StateHasChanged();
         });
@@ -73,7 +83,7 @@
         if (user.Identity.IsAuthenticated)
         {
             var currentUser = await UserManager.GetUserAsync(user);
-            User = currentUser.PokemonGoNickname;
+            User = $"{ currentUser.PokemonGoNickname} | {currentUser.TrainerCode}";
         }
 
         await HubConnection.SendAsync("SendMessage", User, Message, Room, true);
