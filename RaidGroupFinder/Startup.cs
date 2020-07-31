@@ -45,6 +45,7 @@ namespace RaidGroupFinder
             services.AddServerSideBlazor();
             
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
+            services.AddScoped<ChatHistoryRepository>();
             services.AddSingleton<FixedSizedQueueService>();
             //services.AddScoped<TokenProvider>();
             

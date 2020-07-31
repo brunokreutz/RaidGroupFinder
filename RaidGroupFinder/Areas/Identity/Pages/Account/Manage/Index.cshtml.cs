@@ -37,6 +37,7 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account.Manage
             [RegularExpression("[0-9]{4}[ ][0-9]{4}[ ][0-9]{4}|[0-9]{12}", ErrorMessage = "Invalid Trainer Code")]
             public string TrainerCode { get; set; }
             [Required]
+            [StringLength(15, ErrorMessage = "Trainer nickname is too long.")]
             public string PokemonGoNickname { get; set; }
         }
 
@@ -85,7 +86,7 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account.Manage
                 user.TrainerCode = Input.TrainerCode;
                 if (!TryValidateModel(user)) 
                 {
-                    StatusMessage = "Error! Invalid Trainer code";
+                    StatusMessage = "Error!";
                     return Page();
                 }
 

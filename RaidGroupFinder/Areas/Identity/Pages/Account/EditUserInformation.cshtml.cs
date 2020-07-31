@@ -31,6 +31,7 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account
             [RegularExpression("[0-9]{4}[ ][0-9]{4}[ ][0-9]{4}|[0-9]{12}", ErrorMessage = "Invalid Trainer Code!")]
             public string TrainerCode { get; set; }
             [Required]
+            [StringLength(15, ErrorMessage = "Trainer nickname is too long.")]
             public string PokemonGoNickname { get; set; }
         }
 

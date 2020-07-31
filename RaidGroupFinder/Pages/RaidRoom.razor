@@ -1,4 +1,4 @@
-﻿@page "/raid/{Room}"
+﻿@page "/raid/{Room:guid}"
 @using Microsoft.AspNetCore.SignalR.Client
 @using RaidGroupFinder.Data
 @using System.Text.RegularExpressions
@@ -7,7 +7,7 @@
 @inject UserManager<ApplicationUser> UserManager;
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
-@inject FixedSizedQueueService FixedSizedQueueService
+@inject ChatHistoryRepository ChatHistoryRepository
 @implements IDisposable
 
 <AuthorizeView>
@@ -20,15 +20,15 @@
             {
                 @foreach (var me in Messages)
                 {
-                    var color = UserColor.GetValueOrDefault(me.Item1);
+                    var color = UserColor.GetValueOrDefault(me.User);
                     <div class="comment">
                         <div class="content">
-                            <div class="d-inline author @color"> @me.Item1</div>
+                            <div class="d-inline author @color"> @me.User</div>
                             <div class="metadata">
-                                <span class="date text-white-50">@me.Item3.ToLocalTime()</span>
+                                <span class="date text-white-50">@me.Date.ToLocalTime()</span>
                             </div>
                             <div class="text text-white">
-                                @me.Item2 
+                                @me.Message 
                             </div>
                         </div>
                     </div>                    
@@ -43,11 +43,11 @@
 </AuthorizeView>
 
 @code {
-        [Parameter]
-        public string Room { get; set; }
+    [Parameter]
+    public Guid Room { get; set; }
 
     private HubConnection HubConnection;
-    private List<(string, string, DateTime)> Messages = new List<(string, string, DateTime)>();
+    private List<ChatHistory> Messages = new List<ChatHistory>();
     private string Message;
     private string User;
     private List<string> Colors = new List<string>() { "t-red", "t-orange", "t-blue", "t-yellowgreen", "t-violet", "t-chocolate" };
@@ -63,15 +63,19 @@
         UserColor.Add("BOT", "t-green");
         var count = 0;
 
-        HubConnection.On<string, string, DateTime>("ReceiveMessage", (usr, message, date) =>
+        HubConnection.On<ChatHistory>("ReceiveMessage", (chat) =>
         {
-            if (usr != "BOT")
+            if (chat.User != "BOT")
             {
-                UserColor.Add(usr, Colors[count % 6]);
-                count++;
+                try
+                {
+                    UserColor.Add(chat.User, Colors[count % 6]);
+                    count++;
+                }
+                catch { }
             }
 
-            Messages.Add((usr, message, date));
+            Messages.Add(chat);
             base.StateHasChanged();
         });
 
@@ -85,6 +89,8 @@
             var currentUser = await UserManager.GetUserAsync(user);
             User = $"{ currentUser.PokemonGoNickname} | {currentUser.TrainerCode}";
         }
+
+        Messages = await ChatHistoryRepository.GetGroupHistory(Room); 
 
         await HubConnection.SendAsync("SendMessage", User, Message, Room, true);
 
