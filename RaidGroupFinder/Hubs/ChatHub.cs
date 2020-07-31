@@ -23,7 +23,7 @@ namespace BlazorSignalRApp.Server.Hubs
 
         public async Task SendMessage(string user, string message, Guid room, bool join)
         {
-            var chat = new ChatHistory() { Guid = Guid.NewGuid(), Date = DateTime.Now, Group = room, Message = message, User = user };
+            var chat = new ChatHistory() { Guid = Guid.NewGuid(), Date = DateTime.UtcNow, Group = room, Message = message, User = user };
             if (join)
             {
                 var splits = user.Split(" |");

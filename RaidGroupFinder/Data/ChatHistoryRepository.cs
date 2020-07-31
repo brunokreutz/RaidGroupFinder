@@ -22,7 +22,7 @@ namespace RaidGroupFinder.Data
 
         public async Task<List<ChatHistory>> GetGroupHistory(Guid group)
         {
-            return await context.ChatHistories.Where(p => p.Group == group).ToListAsync();
+            return await context.ChatHistories.Where(p => p.Group == group).OrderBy(p=> p.Date).ToListAsync();
         }
 
     }

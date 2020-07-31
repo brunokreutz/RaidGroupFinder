@@ -8,6 +8,7 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject ChatHistoryRepository ChatHistoryRepository
+@inject TimeZoneService TimeZoneService
 @implements IDisposable
 
 <AuthorizeView>
@@ -23,23 +24,23 @@
                     var color = UserColor.GetValueOrDefault(me.User);
                     <div class="comment">
                         <div class="content">
-                            <div class="d-inline author @color"> @me.User</div>
+                            <div class="d-inline author" style="color:@color"> @me.User</div>
                             <div class="metadata">
-                                <span class="date text-white-50">@me.Date.ToLocalTime()</span>
+                                <span class="date text-white-50">@me.Date.DateTime</span>
                             </div>
                             <div class="text text-white">
-                                @me.Message 
+                                @me.Message
                             </div>
                         </div>
-                    </div>                    
+                    </div>
                 }
             }
         </div>
-        <div class="form-group fit d-flex">
-            <input class="form-control" type="text" placeholder="Coordinate the raid" @bind="@Message">
+        <div class="form-group fit d-flex" context="Another">
+            <input class="form-control" type="text" placeholder="Coordinate the raid" @bind="@Message" @onkeyup="OnEnter">
             <button type="submit" class="btn btn-primary" disabled="@(!IsConnected)" @onclick="Send">Send</button>
         </div>
-</Authorized>
+    </Authorized>
 </AuthorizeView>
 
 @code {
@@ -50,8 +51,9 @@
     private List<ChatHistory> Messages = new List<ChatHistory>();
     private string Message;
     private string User;
-    private List<string> Colors = new List<string>() { "t-red", "t-orange", "t-blue", "t-yellowgreen", "t-violet", "t-chocolate" };
-    private Dictionary<string,string> UserColor = new Dictionary<string, string>();
+    private Dictionary<string, string> UserColor = new Dictionary<string, string>();
+    private Random Random = new Random();
+    private DateTimeOffset LocalNow;
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,21 +62,12 @@
             .WithAutomaticReconnect()
             .Build();
 
-        UserColor.Add("BOT", "t-green");
-        var count = 0;
+        UserColor.Add("BOT", "#00FF00");
 
         HubConnection.On<ChatHistory>("ReceiveMessage", (chat) =>
         {
-            if (chat.User != "BOT")
-            {
-                try
-                {
-                    UserColor.Add(chat.User, Colors[count % 6]);
-                    count++;
-                }
-                catch { }
-            }
-
+            SetColor(chat);
+            chat.Date = TimeZoneService.GetLocalDateTime(chat.Date).Result;
             Messages.Add(chat);
             base.StateHasChanged();
         });
@@ -90,10 +83,34 @@
             User = $"{ currentUser.PokemonGoNickname} | {currentUser.TrainerCode}";
         }
 
-        Messages = await ChatHistoryRepository.GetGroupHistory(Room); 
+        Messages = await ChatHistoryRepository.GetGroupHistory(Room);
+        foreach (var message in Messages)
+        {
+            message.Date = await TimeZoneService.GetLocalDateTime(message.Date);
+            SetColor(message);
+        }
 
         await HubConnection.SendAsync("SendMessage", User, Message, Room, true);
+    }
 
+    protected void SetColor(ChatHistory chat)
+    {
+        if (chat.User != "BOT")
+        {
+            try
+            {
+                UserColor.Add(chat.User, $"#{Convert.ToString(Random.Next(122) + 123, 16)}{Convert.ToString(Random.Next(122) + 123, 16)}{Convert.ToString(Random.Next(122) + 123, 16)}");
+            }
+            catch { }
+        }
+    }
+
+    protected void OnEnter(KeyboardEventArgs eventArgs)
+    {
+        if (eventArgs.Key == "Enter")
+        {
+            Send();
+        }
     }
 
     protected void Send()

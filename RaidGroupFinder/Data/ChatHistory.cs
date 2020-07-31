@@ -12,7 +12,7 @@ namespace RaidGroupFinder.Data
         public string User { get; set; }
         public string Message { get; set; }
         public Guid Group { get; set; }
-        public DateTime Date { get; set; }
+        public DateTimeOffset Date { get; set; }
 
     }
 }

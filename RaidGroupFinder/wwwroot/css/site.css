@@ -1,8 +1,6 @@
 @import url('bootstrap/bootstrap.min.css');
 @import url('semanticui/semantic.min.css');
 
-$primary: purple;
-
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     min-height: 100vh;
@@ -196,37 +194,6 @@ hr{
     font-weight: bold;
     font-family: 'Roboto',arial,sans-serif;
 }
-
-.t-green{
-    color: green!important;
-}
-
-.t-red {
-    color: red!important;
-}
-
-.t-orange {
-    color: orangered!important;
-}
-
-.t-blue {
-    color: dodgerblue!important;
-}
-
-.t-yellowgreen {
-    color: yellowgreen!important;
-}
-
-.t-violet {
-    color: mediumvioletred!important;
-}
-
-.t-chocolate {
-    color: chocolate!important;
-}
-
-
-
 
 .content {
     padding-top: .3rem;
