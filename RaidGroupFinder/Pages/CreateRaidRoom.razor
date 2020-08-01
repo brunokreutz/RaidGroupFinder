@@ -1,0 +1,100 @@
+﻿@page "/create-raid"
+@using Microsoft.AspNetCore.SignalR.Client
+@using RaidGroupFinder.Data
+@using RaidGroupFinder.Data.Model
+@using System.Text.RegularExpressions
+@using Microsoft.AspNetCore.Mvc.Rendering;
+@using System.ComponentModel.DataAnnotations;
+@using Helper
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Microsoft.AspNetCore.Identity;
+@inject UserManager<ApplicationUser> UserManager;
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DbService DbService
+<AuthorizeView>
+    <NotAuthorized>
+<h2 class="text-white">You need to <a href="Identity/Account/Login">Login</a> first</h2>
+</NotAuthorized>
+    <Authorized >
+<h2 class="text-white">Create Raid Room</h2>
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <EditForm Context="EditContext" Model="@Input" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="form-group text-white">
+                <label>Pokemon</label>
+                <InputSelect class="custom-select border-bottom-10" @bind-Value="Input.Pokemon">
+                    <option value="">Select</option>
+                    @if (Raids != null)
+                    {
+                        @foreach (var option in Raids)
+                        {
+                            <option value="@option.Id.ToString()">
+                                @option.Pokemon.Name
+                            </option>
+                        }
+                    }
+                </InputSelect>
+                <label>Hatchs</label>
+                <input type="datetime-local" class="form-control border-bottom-10" @bind="Input.Hatched">
+                <label>Location (Optional)</label>
+                <input type="text" maxlength="50" class="form-control border-bottom-10" @bind="Input.Location">
+                <button class="ui button btn-primary">Create Raid</button>
+            </div>
+        </EditForm>
+
+    </div>
+</div>
+</Authorized>
+    </AuthorizeView>
+
+@code {
+    private List<Raid> Raids { get; set; }
+    private InputModel Input = new InputModel();
+    private ApplicationUser CurrentUser { get; set; }
+    private TimeSpan Offset { get; set; }
+
+    public class InputModel
+    {
+        public DateTime Hatched { get; set; }
+        [Required]
+        public string Pokemon { get; set; }
+        [StringLength(50, ErrorMessage = "Location is Too Long")]
+        public string Location { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            return;
+        }
+
+        //string id = user.Claims.Where(p => p.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Select(p => p.Value).FirstOrDefault();
+        CurrentUser = await UserManager.GetUserAsync(user);
+        var tz = TimeZoneInfo.FindSystemTimeZoneById(CurrentUser.TimeZone);
+        Offset = tz.BaseUtcOffset;
+        Input.Hatched = DateTime.UtcNow.Add(Offset);
+        Input.Hatched = Input.Hatched.AddSeconds(-Input.Hatched.Second);
+        Raids = await DbService.GetActiveRaids();
+        StateHasChanged();
+    }
+
+    protected async Task HandleValidSubmit()
+    {
+        Guid guid = Guid.NewGuid();
+        var raidBattle = new RaidBattle()
+        {
+            Hatched = Input.Hatched.Subtract(Offset), Guid = guid, Host = CurrentUser.PokemonGoNickname, Location = Input.Location ?? CurrentUser.TimeZone, Created = DateTime.UtcNow,
+            Raid = Raids.FirstOrDefault(p => p.Id.ToString() == Input.Pokemon)
+        };
+        await DbService.CreateRaidBattle(raidBattle);
+
+        NavigationManager.NavigateTo($"raid/{guid}");
+    }
+}

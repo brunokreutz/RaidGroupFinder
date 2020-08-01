@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using RaidGroupFinder.Data;
+using RaidGroupFinder.Helper;
 
 namespace RaidGroupFinder.Areas.Identity.Pages.Account.Manage
 {
@@ -95,7 +96,7 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account.Manage
             if (Input.TrainerCode != user.TrainerCode || Input.PokemonGoNickname != user.PokemonGoNickname)
             {
                 user.PokemonGoNickname = Input.PokemonGoNickname;
-                user.TrainerCode = Input.TrainerCode;
+                user.TrainerCode = RegexHelper.ReplaceWhitespace(Input.TrainerCode);
                 if (!TryValidateModel(user)) 
                 {
                     StatusMessage = "Error!";

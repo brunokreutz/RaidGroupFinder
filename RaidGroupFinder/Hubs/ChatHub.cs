@@ -4,49 +4,68 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using RaidGroupFinder.Data;
+using RaidGroupFinder.Data.Model;
 
 namespace BlazorSignalRApp.Server.Hubs
 {
     public class ChatHub : Hub
     {
-        //public async Task SendMessage(string message)
-        //{
-        //    await Clients.All.SendAsync("ReceiveMessage", message);
-        //}
+        private const string BOT = "BOT";
 
-        private ChatHistoryRepository chatHistoryRepository;
+        private readonly DbService ChatDbService;
 
-        public ChatHub(ChatHistoryRepository chatHistoryRepository)
+        public ChatHub(DbService chatDbService)
         {
-            this.chatHistoryRepository = chatHistoryRepository;
+            this.ChatDbService = chatDbService;
         }
 
-        public async Task SendMessage(string user, string message, Guid room, bool join)
+        public async Task SendMessage(string user, string message, Guid room, string id)
         {
             var chat = new ChatHistory() { Guid = Guid.NewGuid(), Date = DateTime.UtcNow, Group = room, Message = message, User = user };
-            if (join)
+            if (id != null)
             {
+                await Groups.AddToGroupAsync(Context.ConnectionId, room.ToString()).ConfigureAwait(false);
+
+                var con = new Connection() { Active = true, ConnectionID = Context.ConnectionId, Room = room, UserId = id };
+                await ChatDbService.AddConnection(con);
+
                 var splits = user.Split(" |");
-                await JoinRoom(room.ToString()).ConfigureAwait(false);
-                chat.User = "BOT";
-                chat.Message = $"{splits.First()}, trainer code:{splits.Last()} joined the raid room.";
-                await Clients.Group(room.ToString()).SendAsync("ReceiveMessage", chat).ConfigureAwait(true);
+                string name = splits.First();
+                Context.Items.Add(Context.ConnectionId, (name, room));
+
+                chat.User = BOT;
+                chat.Message = $"{name} joined.";
+
             }
-            else
+            await Clients.Group(room.ToString()).SendAsync("ReceiveMessage", chat).ConfigureAwait(true);
+            await ChatDbService.SaveMessage(chat);
+        }
+
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            try
             {
-                await Clients.Group(room.ToString()).SendAsync("ReceiveMessage", chat).ConfigureAwait(true);
+                var (name, guid) = ((string name, Guid guid))Context.Items[Context.ConnectionId];
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, guid.ToString());
+
+                var chat = new ChatHistory()
+                {
+                    Guid = Guid.NewGuid(),
+                    Date = DateTime.UtcNow,
+                    Group = guid,
+                    Message = $"{name} left.",
+                    User = BOT
+                };
+
+                await Clients.Group(guid.ToString()).SendAsync("ReceiveMessage", chat).ConfigureAwait(true);
+                await ChatDbService.SaveMessage(chat);
+                await ChatDbService.DeactivateConnection(Context.ConnectionId);
+                await base.OnDisconnectedAsync(exception);
             }
-            await chatHistoryRepository.SaveMessage(chat);
-        }
+            catch
+            {
 
-        public Task JoinRoom(string roomName)
-        {
-            return Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-        }
-
-        public Task LeaveRoom(string roomName)
-        {
-            return Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
+            }
         }
     }
 }

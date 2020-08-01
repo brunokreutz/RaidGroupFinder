@@ -204,7 +204,8 @@ namespace RaidGroupFinder.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TimeZone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
                     b.Property<string>("TrainerCode")
                         .HasColumnType("nvarchar(14)")
@@ -258,6 +259,124 @@ namespace RaidGroupFinder.Data.Migrations
                     b.ToTable("ChatHistories");
                 });
 
+            modelBuilder.Entity("RaidGroupFinder.Data.Model.Connection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ConnectionID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("Room")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasMaxLength(450);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Active");
+
+                    b.HasIndex("Room");
+
+                    b.ToTable("Connections");
+                });
+
+            modelBuilder.Entity("RaidGroupFinder.Data.Model.Pokemon", b =>
+                {
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Form")
+                        .HasColumnType("nvarchar(10)")
+                        .HasMaxLength(10);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.HasKey("Number", "Form");
+
+                    b.ToTable("Pokemons");
+                });
+
+            modelBuilder.Entity("RaidGroupFinder.Data.Model.Raid", b =>
+                {
+                    b.Property<short>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Available")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PokemonForm")
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<int?>("PokemonNumber")
+                        .HasColumnType("int");
+
+                    b.Property<byte>("Tier")
+                        .HasColumnType("tinyint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Available");
+
+                    b.HasIndex("PokemonNumber", "PokemonForm");
+
+                    b.ToTable("Raids");
+                });
+
+            modelBuilder.Entity("RaidGroupFinder.Data.Model.RaidBattle", b =>
+                {
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Hatched")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Host")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<short?>("RaidId")
+                        .HasColumnType("smallint");
+
+                    b.HasKey("Guid");
+
+                    b.HasIndex("Active");
+
+                    b.HasIndex("Created");
+
+                    b.HasIndex("Hatched");
+
+                    b.HasIndex("RaidId");
+
+                    b.ToTable("RaidBattles");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -307,6 +426,20 @@ namespace RaidGroupFinder.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("RaidGroupFinder.Data.Model.Raid", b =>
+                {
+                    b.HasOne("RaidGroupFinder.Data.Model.Pokemon", "Pokemon")
+                        .WithMany()
+                        .HasForeignKey("PokemonNumber", "PokemonForm");
+                });
+
+            modelBuilder.Entity("RaidGroupFinder.Data.Model.RaidBattle", b =>
+                {
+                    b.HasOne("RaidGroupFinder.Data.Model.Raid", "Raid")
+                        .WithMany()
+                        .HasForeignKey("RaidId");
                 });
 #pragma warning restore 612, 618
         }

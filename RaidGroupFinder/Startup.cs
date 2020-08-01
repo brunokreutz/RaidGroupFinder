@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RaidGroupFinder.Areas.Identity;
 using RaidGroupFinder.Data;
+using RaidGroupFinder.Hubs;
 
 namespace RaidGroupFinder
 {
@@ -45,7 +46,7 @@ namespace RaidGroupFinder
             services.AddServerSideBlazor();
             
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
-            services.AddScoped<ChatHistoryRepository>(); 
+            services.AddScoped<DbService>(); 
             services.AddSingleton<FixedSizedQueueService>();
             //services.AddScoped<TokenProvider>();
             
@@ -98,6 +99,7 @@ namespace RaidGroupFinder
                 endpoints.MapRazorPages();
                 endpoints.MapBlazorHub(); 
                 endpoints.MapHub<ChatHub>("/chathub");
+                endpoints.MapHub<RaidHub>("/raidhub");
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

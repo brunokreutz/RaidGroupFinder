@@ -17,10 +17,11 @@ a, .btn-link {
     /*height: -moz-calc(100% - (20px + 30px));
     height: -webkit-calc(100% - (20px + 30px));
     height: calc(100% - (20px + 30px));*/
-    min-height: calc(100vh - 140px );
-    align-items: flex-end;
+    display: flex;
+    min-height: calc(100vh - 145px );
     overflow-y: scroll;
-    max-height: calc(100vh - 140px );
+    max-height: calc(100vh - 145px );
+    flex-direction: column-reverse;
     margin: unset;
     max-width: none;
 }
@@ -240,6 +241,13 @@ hr{
 
 .ui.grid + .grid {
     margin-top: .2rem;
+}
+
+.my-reconnect-modal .components-reconnect-hide{
+    display:none!important;
+}
+#components-reconnect-modal {
+    display: none;
 }
 
 @media (max-width: 767.98px) {

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using RaidGroupFinder.Data;
+using RaidGroupFinder.Helper;
 
 namespace RaidGroupFinder.Areas.Identity.Pages.Account
 {
@@ -97,7 +98,7 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account
             }
 
             user.PokemonGoNickname = Input.PokemonGoNickname;
-            user.TrainerCode = Input.TrainerCode;
+            user.TrainerCode = RegexHelper.ReplaceWhitespace(Input.TrainerCode);
             user.TimeZone = Input.Timezone;
             
             if (!TryValidateModel(user))

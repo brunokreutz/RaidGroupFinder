@@ -5,6 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\Migrations\20200801143318_chatRoom2.cs" />
+    <Compile Remove="Data\Migrations\20200801143318_chatRoom2.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200801175821_pokeRaid.cs" />
+    <Compile Remove="Data\Migrations\20200801175821_pokeRaid.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200801180125_pokeRaid.cs" />
+    <Compile Remove="Data\Migrations\20200801180125_pokeRaid.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200801180913_pokeRaid2.cs" />
+    <Compile Remove="Data\Migrations\20200801180913_pokeRaid2.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.6" />
     <PackageReference Include="Microsoft.JSInterop" Version="3.1.6" />

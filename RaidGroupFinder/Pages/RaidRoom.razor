@@ -1,13 +1,12 @@
 ﻿@page "/raid/{Room:guid}"
 @using Microsoft.AspNetCore.SignalR.Client
 @using RaidGroupFinder.Data
-@using System.Text.RegularExpressions
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @using Microsoft.AspNetCore.Identity;
 @inject UserManager<ApplicationUser> UserManager;
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
-@inject ChatHistoryRepository ChatHistoryRepository
+@inject DbService DbService
 @implements IDisposable
 
 <AuthorizeView>
@@ -18,17 +17,17 @@
         <div class="ui minimal comments" id="chat">
             @if (Messages != null)
             {
-                @foreach (var me in Messages)
+                @for(int i = Messages.Count -1; i >= 0; i--)
                 {
-                    var color = UserColor.GetValueOrDefault(me.User);
+                    var color = UserColor.GetValueOrDefault(Messages[i].User);
                     <div class="comment">
                         <div class="content">
-                            <div class="d-inline author" style="color:@color"> @me.User</div>
+                            <div class="d-inline author" style="color:@color"> @Messages[i].User</div>
                             <div class="metadata">
-                                <span class="date text-white-50">@me.Date.DateTime</span>
+                                <span class="date text-white-50">@Messages[i].Date.DateTime</span>
                             </div>
                             <div class="text text-white">
-                                @me.Message
+                                @Messages[i].Message
                             </div>
                         </div>
                     </div>
@@ -65,18 +64,13 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        ApplicationUser currentUser;
-
-        if (user.Identity.IsAuthenticated)
-        {
-            currentUser = await UserManager.GetUserAsync(user);
-            User = $"{ currentUser.PokemonGoNickname} | {currentUser.TrainerCode}";
-        }
-        else
+        if (!user.Identity.IsAuthenticated)
         {
             return;
         }
-
+        string id = user.Claims.Where(p => p.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Select(p => p.Value).FirstOrDefault();
+        ApplicationUser currentUser = await UserManager.GetUserAsync(user);
+        User = $"{ currentUser.PokemonGoNickname} | {currentUser.TrainerCode}";
         UserColor.Add("BOT", "#00FF00");
 
         var offset = TimeZoneInfo.FindSystemTimeZoneById(currentUser.TimeZone).BaseUtcOffset;
@@ -89,7 +83,7 @@
             base.StateHasChanged();
         });
 
-        Messages = await ChatHistoryRepository.GetGroupHistory(Room);
+        Messages = await DbService.GetGroupHistory(Room);
 
         foreach (var message in Messages)
         {
@@ -97,7 +91,7 @@
             SetColor(message);
         }
 
-        await HubConnection.SendAsync("SendMessage", User, Message, Room, true);
+        await HubConnection.SendAsync("SendMessage", User, Message, Room, id);
     }
 
     protected void SetColor(ChatHistory chat)
@@ -122,7 +116,7 @@
 
     protected void Send()
     {
-        HubConnection.SendAsync("SendMessage", User, Message, Room, false);
+        HubConnection.SendAsync("SendMessage", User, Message, Room, null);
         Message = "";
         base.StateHasChanged();
     }

@@ -1,12 +1,15 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.SignalR.Client
-@using RaidGroupFinder.Data
+@using RaidGroupFinder.Data.Model
 @using System.Text.RegularExpressions
+@using RaidGroupFinder.Data
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DbService DbService
 
 <MainMessage></MainMessage>
 <div class="two ui buttons">
-    <button class="ui orange button">Host a Raid</button>
+    <button class="ui orange button" @onclick="RaidRoom">Host a Raid</button>
     <button class="ui btn-primary button">Tainer Codes List</button>
 </div>
 <div class="ui stackable two column grid">
@@ -24,4 +27,28 @@
 </div>
 
 @code{
+    private List<RaidBattle> RaidBattles { get; set; }
+    private HubConnection hubConnection;
+    public void RaidRoom()
+    {
+        NavigationManager.NavigateTo("/create-raid");
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        RaidBattles = await DbService.GetActiveRaidBattles();
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/raidhub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<RaidBattle>("ReceiveMessage", (raid) =>
+        {
+            RaidBattles.Add(raid);
+            StateHasChanged();
+        });
+        StateHasChanged();
+    }
 }
