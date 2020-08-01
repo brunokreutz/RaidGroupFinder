@@ -19,7 +19,12 @@
         </li>
         @if (SignInManager.IsSignedIn(User))
         {
-            var nick = (await UserManager.GetUserAsync(User)).PokemonGoNickname;
+            string nick = "";
+            try
+            {
+                nick = (await UserManager.GetUserAsync(User)).PokemonGoNickname;
+            }
+            catch { }
             <li class="nav-item">
                 <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @nick!</a>
             </li>

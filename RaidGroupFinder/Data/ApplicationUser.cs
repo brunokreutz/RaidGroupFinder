@@ -15,5 +15,6 @@ namespace RaidGroupFinder.Data
         public string TrainerCode { get; set; }
         [StringLength(15, ErrorMessage = "Nickname is too long.")]
         public string PokemonGoNickname { get; set; }
+        public string TimeZone { get; set; }
     }
 }

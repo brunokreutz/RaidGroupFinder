@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using RaidGroupFinder.Data;
 
@@ -22,7 +23,7 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account
         public InputModel Input { get; set; }
 
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        public List<SelectListItem> Options { get; set; }
 
         public class InputModel
         {
@@ -33,16 +34,48 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account
             [Required]
             [StringLength(15, ErrorMessage = "Trainer nickname is too long.")]
             public string PokemonGoNickname { get; set; }
+            [Required]
+            public string Timezone { get; set; }
         }
 
-        public EditUserInformationModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+
+        public EditUserInformationModel(UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
         }
 
         public string StatusMessage { get; set; }
         public string Alert { get; set; }
+
+        private async Task LoadAsync(ApplicationUser user)
+        {
+            var userName = await _userManager.GetUserNameAsync(user); 
+
+            Input = new InputModel
+            {
+                PokemonGoNickname = user.PokemonGoNickname,
+                TrainerCode = user.TrainerCode
+            };
+
+            var tzs = TimeZoneInfo.GetSystemTimeZones();
+            Options = tzs.Select(tz => new SelectListItem()
+            {
+                Text = tz.DisplayName,
+                Value = tz.Id
+            }).ToList();
+        }
+
+        public async Task<ActionResult> OnGetAsync()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            await LoadAsync(user);
+            return Page();
+        }
 
         //public async Task<IActionResult> OnGetAsync()
         //{
@@ -56,6 +89,7 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account
 
         public async Task<ActionResult> OnPostAsync()
         {
+
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
@@ -64,15 +98,17 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account
 
             user.PokemonGoNickname = Input.PokemonGoNickname;
             user.TrainerCode = Input.TrainerCode;
+            user.TimeZone = Input.Timezone;
+            
             if (!TryValidateModel(user))
             {
                 StatusMessage = "Error! Invalid Trainer code";
-                return Page();
+                return await this.OnGetAsync();
             }
             var result = await _userManager.UpdateAsync(user);
             StatusMessage = result.Succeeded ? "Trainer info Updated" : "Error updating your Trainer Info.";
             
-            return Page();
+            return await this.OnGetAsync();
         }
     }
 }

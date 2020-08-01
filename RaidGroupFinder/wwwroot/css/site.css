@@ -10,6 +10,9 @@ a, .btn-link {
     color: #0366d6;
 }
 
+.border-bottom-10{
+    margin-bottom: 10px
+}
 .comments#chat {
     /*height: -moz-calc(100% - (20px + 30px));
     height: -webkit-calc(100% - (20px + 30px));

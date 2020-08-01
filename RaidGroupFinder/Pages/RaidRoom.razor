@@ -8,7 +8,6 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject ChatHistoryRepository ChatHistoryRepository
-@inject TimeZoneService TimeZoneService
 @implements IDisposable
 
 <AuthorizeView>
@@ -53,7 +52,6 @@
     private string User;
     private Dictionary<string, string> UserColor = new Dictionary<string, string>();
     private Random Random = new Random();
-    private DateTimeOffset LocalNow;
 
     protected override async Task OnInitializedAsync()
     {
@@ -62,31 +60,40 @@
             .WithAutomaticReconnect()
             .Build();
 
-        UserColor.Add("BOT", "#00FF00");
-
-        HubConnection.On<ChatHistory>("ReceiveMessage", (chat) =>
-        {
-            SetColor(chat);
-            chat.Date = TimeZoneService.GetLocalDateTime(chat.Date).Result;
-            Messages.Add(chat);
-            base.StateHasChanged();
-        });
-
         await HubConnection.StartAsync();
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
+        ApplicationUser currentUser;
+
         if (user.Identity.IsAuthenticated)
         {
-            var currentUser = await UserManager.GetUserAsync(user);
+            currentUser = await UserManager.GetUserAsync(user);
             User = $"{ currentUser.PokemonGoNickname} | {currentUser.TrainerCode}";
         }
+        else
+        {
+            return;
+        }
+
+        UserColor.Add("BOT", "#00FF00");
+
+        var offset = TimeZoneInfo.FindSystemTimeZoneById(currentUser.TimeZone).BaseUtcOffset;
+
+        HubConnection.On<ChatHistory>("ReceiveMessage", (chat) =>
+        {
+            SetColor(chat);
+            chat.Date = chat.Date.ToOffset(offset);
+            Messages.Add(chat);
+            base.StateHasChanged();
+        });
 
         Messages = await ChatHistoryRepository.GetGroupHistory(Room);
+
         foreach (var message in Messages)
         {
-            message.Date = await TimeZoneService.GetLocalDateTime(message.Date);
+            message.Date = message.Date.ToOffset(offset); ;
             SetColor(message);
         }
 
@@ -116,10 +123,11 @@
     protected void Send()
     {
         HubConnection.SendAsync("SendMessage", User, Message, Room, false);
+        Message = "";
+        base.StateHasChanged();
     }
 
-    public bool IsConnected =>
-    HubConnection.State == HubConnectionState.Connected;
+    public bool IsConnected => HubConnection.State == HubConnectionState.Connected;
 
     public void Dispose()
     {

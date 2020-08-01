@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using RaidGroupFinder.Data;
 
 namespace RaidGroupFinder.Areas.Identity.Pages.Account.Manage
@@ -24,7 +25,8 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account.Manage
         }
 
         public string Username { get; set; }
-
+        public List<SelectListItem> Options { get; set; }
+        
         [TempData]
         public string StatusMessage { get; set; }
 
@@ -39,19 +41,29 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account.Manage
             [Required]
             [StringLength(15, ErrorMessage = "Trainer nickname is too long.")]
             public string PokemonGoNickname { get; set; }
+            [Required]
+            public string Timezone { get; set; }
         }
+
 
         private async Task LoadAsync(ApplicationUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
 
             Username = userName;
-
+           
             Input = new InputModel
             {
                 PokemonGoNickname = user.PokemonGoNickname,
                 TrainerCode = user.TrainerCode
             };
+
+            var tzs = TimeZoneInfo.GetSystemTimeZones();
+            Options = tzs.Select(tz => new SelectListItem()
+            {
+                Text = tz.DisplayName,
+                Value = tz.Id
+            }).ToList();
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -61,7 +73,7 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account.Manage
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
-
+            
             await LoadAsync(user);
             return Page();
         }

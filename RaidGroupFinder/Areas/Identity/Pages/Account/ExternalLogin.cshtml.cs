@@ -122,7 +122,7 @@ namespace RaidGroupFinder.Areas.Identity.Pages.Account
 
                 if (ModelState.IsValid)
                 {
-                    var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
+                    var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email, TimeZone= "America/New_York", TrainerCode = "000000000000", PokemonGoNickname = "Unknown" };
 
                     var result2 = await _userManager.CreateAsync(user);
                     if (result2.Succeeded)

@@ -5,21 +5,29 @@
 }
 
 <h2 class="text-white">@ViewData["Title"]</h2>
-
+<h3 class="text-white">We're almost there.</h3>
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6 col-md-offset-3">
         <partial name="_StatusMessage" model="Model.StatusMessage" />
         <form asp-page-handler="Post" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group text-white">
+                <div>
+                    <label style="display:contents">Time Zone</label>
+                    <label style="color:yellow; display:contents; margin-bottom:10px">
+                    This information is very IMPORTANT to adjust raid times to your local time
+                    </label>
+                 </div>
+                <select asp-for="Input.Timezone" asp-items="@Model.Options" class="custom-select border-bottom-10"></select>
                 <label asp-for="Input.TrainerCode"></label>
                 <span asp-validation-for="Input.TrainerCode" class="text-danger"></span>
-                <input asp-for="Input.TrainerCode" class="form-control" />
+                <input asp-for="Input.TrainerCode" class="form-control border-bottom-10" />
                 <label asp-for="Input.PokemonGoNickname"></label>
                 <span asp-validation-for="Input.PokemonGoNickname" class="text-danger"></span>
-                <input asp-for="Input.PokemonGoNickname" class="form-control" />
+                <input asp-for="Input.PokemonGoNickname" class="form-control border-bottom-10" />
             </div>
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
+
     </div>
     </div>
