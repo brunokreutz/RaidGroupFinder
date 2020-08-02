@@ -37,8 +37,8 @@ namespace RaidGroupFinder
             services.AddSignalR();
             //services.AddDbContext<ApplicationDbContext>(options =>
             //    options.UseSqlServer(Environment.GetEnvironmentVariable("ConnectionString")));
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationDbContext>( options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
 
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -46,7 +46,7 @@ namespace RaidGroupFinder
             services.AddServerSideBlazor();
             
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
-            services.AddScoped<DbService>(); 
+            services.AddTransient<DbService>(); 
             services.AddSingleton<FixedSizedQueueService>();
             //services.AddScoped<TokenProvider>();
             

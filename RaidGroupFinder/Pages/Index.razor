@@ -6,6 +6,9 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject DbService DbService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Microsoft.AspNetCore.Identity;
+@inject UserManager<ApplicationUser> UserManager
 
 <MainMessage></MainMessage>
 <div class="two ui buttons">
@@ -15,25 +18,36 @@
 <div class="ui stackable two column grid">
     <div class="column text-white">
         <h3> Active Raids</h3>
-        <RaidCard></RaidCard>
-        <RaidCard></RaidCard>
-        <RaidCard></RaidCard>
+        @if (RaidBattles != null)
+        {
+            foreach (var rb in RaidBattles)
+            {
+                string iconPath;
+                if (rb.Raid.Pokemon.Form == "normal")
+                {
+                    iconPath = $"/icons/pokemon64x64/{rb.Raid.Pokemon.Number}.png";
+                }
+                else
+                {
+                    iconPath = $"/icons/pokemon64x64/{rb.Raid.Pokemon.Name}-{rb.Raid.Pokemon.Form}.png";
+                }
+                <RaidCard RaidBattle="@rb" IconPath="@iconPath" OffSet="@Offset"></RaidCard>
+            }
+        }
     </div>
     <div class="column text-white">
         <h3> Last Raids</h3>
-        <RaidCard></RaidCard>
-        <RaidCard></RaidCard>
     </div>
 </div>
 
 @code{
-    private List<RaidBattle> RaidBattles { get; set; }
+    private List<RaidBattle> RaidBattles;
+    private TimeSpan Offset;
     private HubConnection hubConnection;
     public void RaidRoom()
     {
         NavigationManager.NavigateTo("/create-raid");
     }
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,6 +63,18 @@
             RaidBattles.Add(raid);
             StateHasChanged();
         });
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            StateHasChanged();
+            return;
+        }
+        string id = user.Claims.Where(p => p.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Select(p => p.Value).FirstOrDefault();
+        ApplicationUser currentUser = await UserManager.GetUserAsync(user);
+        Offset = TimeZoneInfo.FindSystemTimeZoneById(currentUser.TimeZone).BaseUtcOffset;
         StateHasChanged();
     }
 }

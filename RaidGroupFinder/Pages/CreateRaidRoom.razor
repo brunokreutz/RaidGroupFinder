@@ -77,8 +77,7 @@
 
         //string id = user.Claims.Where(p => p.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Select(p => p.Value).FirstOrDefault();
         CurrentUser = await UserManager.GetUserAsync(user);
-        var tz = TimeZoneInfo.FindSystemTimeZoneById(CurrentUser.TimeZone);
-        Offset = tz.BaseUtcOffset;
+        Offset = TimeZoneInfo.FindSystemTimeZoneById(CurrentUser.TimeZone).BaseUtcOffset;
         Input.Hatched = DateTime.UtcNow.Add(Offset);
         Input.Hatched = Input.Hatched.AddSeconds(-Input.Hatched.Second);
         Raids = await DbService.GetActiveRaids();

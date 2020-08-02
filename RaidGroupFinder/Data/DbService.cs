@@ -56,5 +56,10 @@ namespace RaidGroupFinder.Data
             return await context.RaidBattles.Include(p=> p.Raid).Include(p => p.Raid.Pokemon).Where(p => p.Hatched < DateTime.UtcNow.AddMinutes(45)).OrderByDescending(p => p.Created).ToListAsync();
         }
 
+        public async Task<int> GetPlayersInRaidRoom(Guid guid)
+        {
+            return await context.Connections.Where(p => p.Active && p.Room == guid).CountAsync();
+        }
+
     }
 }

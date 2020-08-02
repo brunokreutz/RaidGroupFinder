@@ -35,7 +35,7 @@ ul {
 }
 
 .raid-icon {
-    max-height: 20px;
+    max-width: 15px;
 }
 
 .accent {
@@ -79,10 +79,30 @@ ul {
 .bg-img {
     background: radial-gradient(#ffa2a2, #a7132e);
     min-width: 96px;
+    min-height: 96px;
+    max-width: 96px;
+    max-height: 96px;
 }
 
 .raid-card{
     min-width: 320px;
+}
+
+.ui.grid {
+    margin: 0px;
+    padding: 0px;
+    max-height: 96px;
+}
+
+    .ui.grid + .grid {
+        margin-top: .2rem;
+    }
+
+.padding-top-10{
+    padding-top: 10px!important;
+}
+.padding-bottom-10{
+    padding-bottom: 10px!important;
 }
 
 .padding-top-15{
@@ -232,15 +252,6 @@ hr{
     position: absolute;
     right: 0.75rem;
     top: 0.5rem;
-}
-
-.ui.grid{
-    margin: 0px;
-    padding: 0px;
-}
-
-.ui.grid + .grid {
-    margin-top: .2rem;
 }
 
 .my-reconnect-modal .components-reconnect-hide{
