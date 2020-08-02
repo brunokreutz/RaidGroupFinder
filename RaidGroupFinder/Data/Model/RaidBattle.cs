@@ -13,6 +13,7 @@ namespace RaidGroupFinder.Data.Model
         public DateTime Created { get; set; }
         public string Location { get; set; }
         public string Host { get; set; }
+        public string HostUserId { get; set; }
         public bool Active { get; set; }
     }
 }

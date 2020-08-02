@@ -4,7 +4,7 @@
 
 
 <div class="ui grid @Bg raid-card" @onclick="JoinRoom">
-    <img src="@IconPath" class="five wide column bg-img @Status">
+    <img src="@IconPath" class="five wide column bg-img tier-5 @Status">
     <div class="ten wide column padding-bottom-10 padding-top-10">
         <div class="header">
             <div class="float-right">
@@ -29,16 +29,10 @@
             }
             @if (Active)
             {
-            <div class="text-white">Players: <b>(@Players/6)</b></div>
+            <div class="text-white">Players <b>(@Players/6)</b></div>
             }
         </div>
     </div>
-    @if (Active)
-    {
-    <div class="align-items-center arrow">
-        <img src="/icons/next-24.svg" />
-    </div>
-    }
 </div>
 
 @code {
@@ -67,7 +61,7 @@
     {
         if (Active)
         {
-            Bg = "bg-indianred arrow";
+            Bg = $"bg-tier-5 arrow";
             Status = ""; 
             Players = await DbService.GetPlayersInRaidRoom(RaidBattle.Guid);
         }

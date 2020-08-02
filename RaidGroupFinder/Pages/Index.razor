@@ -16,25 +16,25 @@
 </h5>
 <div class="two ui buttons">
     <button class="ui orange button" @onclick="RaidRoom">Host a Raid</button>
-    <button class="ui btn-primary button">Tainer Codes List</button>
+    <button class="ui btn-primary button" @onclick="TrainerList">Tainer Codes List</button>
 </div>
 <div class="ui stackable two column grid">
     <div class="column text-white">
         <h3 class="margin-top-13"> Active Raids</h3>
         @if (RaidBattles != null)
         {
-            foreach (var rb in RaidBattles)
+            for (int i =RaidBattles.Count-1; i >=0; i--)
             {
                 string iconPath;
-                if (rb.Raid.Pokemon.Form == "normal")
+                if (RaidBattles[i].Raid.Pokemon.Form == "normal")
                 {
-                    iconPath = $"/icons/pokemon64x64/{rb.Raid.Pokemon.Number}.png";
+                    iconPath = $"/icons/pokemon64x64/{RaidBattles[i].Raid.Pokemon.Number}.png";
                 }
                 else
                 {
-                    iconPath = $"/icons/pokemon64x64/{rb.Raid.Pokemon.Name}-{rb.Raid.Pokemon.Form}.png";
+                    iconPath = $"/icons/pokemon64x64/{RaidBattles[i].Raid.Pokemon.Name}-{RaidBattles[i].Raid.Pokemon.Form}.png";
                 }
-                <RaidCard RaidBattle="@rb" IconPath="@iconPath" OffSet="@Offset" Active="true"></RaidCard>
+                <RaidCard RaidBattle="@RaidBattles[i]" IconPath="@iconPath" OffSet="@Offset" Active="true"></RaidCard>
             }
         }
     </div>
@@ -58,15 +58,22 @@
         }
     </div>
 </div>
+<Footer></Footer>
 
 @code{
     private List<RaidBattle> RaidBattles;
     private List<RaidBattle> LastRaidBattles;
     private TimeSpan Offset;
     private HubConnection hubConnection;
+
     public void RaidRoom()
     {
         NavigationManager.NavigateTo("/create-raid");
+    }
+
+    public void TrainerList()
+    {
+        NavigationManager.NavigateTo("/trainer-codes-list");
     }
 
     protected override async Task OnInitializedAsync()
@@ -79,6 +86,7 @@
             .WithAutomaticReconnect()
             .Build();
 
+        await hubConnection.StartAsync();
         hubConnection.On<RaidBattle>("ReceiveMessage", (raid) =>
         {
             RaidBattles.Add(raid);

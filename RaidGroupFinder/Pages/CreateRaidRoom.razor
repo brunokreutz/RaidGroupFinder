@@ -91,7 +91,9 @@
         var raidBattle = new RaidBattle()
         {
             Hatched = Input.Hatched.Subtract(Offset), Guid = guid, Host = CurrentUser.PokemonGoNickname,Created = DateTime.UtcNow,
+            HostUserId = CurrentUser.Id,
             Location = Input.Location ?? CurrentUser.TimeZone,
+            Active = true,
             Raid = Raids.FirstOrDefault(p => p.Id.ToString() == Input.Pokemon)
         };
         await DbService.CreateRaidBattle(raidBattle);

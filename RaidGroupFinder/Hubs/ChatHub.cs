@@ -19,10 +19,17 @@ namespace BlazorSignalRApp.Server.Hubs
             this.ChatDbService = chatDbService;
         }
 
-        public async Task SendMessage(string user, string message, Guid room, string id)
+        public async Task SendMessage(string user, string message, Guid room, string id, bool finish)
         {
             var chat = new ChatHistory() { Guid = Guid.NewGuid(), Date = DateTime.UtcNow, Group = room, Message = message, User = user };
-            if (id != null)
+            if (finish)
+            {
+                var splits = user.Split(" |");
+                string name = splits.First();
+                chat.User = BOT;
+                chat.Message = $"{name} finished the raid.";
+            }
+            else if (id != null)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, room.ToString()).ConfigureAwait(false);
 

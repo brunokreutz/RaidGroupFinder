@@ -53,11 +53,11 @@ namespace RaidGroupFinder.Data
 
         public async Task<List<RaidBattle>> GetActiveRaidBattles()
         {
-            return await context.RaidBattles.Include(p=> p.Raid).Include(p => p.Raid.Pokemon).Where(p => p.Hatched > DateTime.UtcNow.AddMinutes(-45)).OrderByDescending(p => p.Created).ToListAsync();
+            return await context.RaidBattles.Include(p=> p.Raid).Include(p => p.Raid.Pokemon).Where(p => p.Hatched > DateTime.UtcNow.AddMinutes(-45) && p.Active).OrderBy(p => p.Created).ToListAsync();
         }
         public async Task<List<RaidBattle>> GetLastInactiveRaidBattles()
         {
-            return await context.RaidBattles.Include(p => p.Raid).Include(p => p.Raid.Pokemon).Where(p => p.Hatched < DateTime.UtcNow.AddMinutes(-45)).OrderByDescending(p => p.Created).Take(5).ToListAsync();
+            return await context.RaidBattles.Include(p => p.Raid).Include(p => p.Raid.Pokemon).Where(p => p.Hatched < DateTime.UtcNow.AddMinutes(-45) || !p.Active).OrderByDescending(p => p.Created).Take(5).ToListAsync();
         }
 
         public async Task<int> GetPlayersInRaidRoom(Guid guid)
@@ -65,5 +65,16 @@ namespace RaidGroupFinder.Data
             return await context.Connections.Where(p => p.Active && p.Room == guid).CountAsync();
         }
 
+        public async Task<RaidBattle> GetRaidBattle(Guid guid)
+        {
+            return await context.RaidBattles.FirstOrDefaultAsync(p => p.Guid == guid);
+        }
+
+        public async Task FinishRaid(RaidBattle raidBattle)
+        {
+            raidBattle.Active = false;
+            context.Update(raidBattle);
+            await context.SaveChangesAsync();
+        }
     }
 }

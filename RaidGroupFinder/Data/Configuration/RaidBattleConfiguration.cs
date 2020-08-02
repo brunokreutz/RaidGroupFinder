@@ -14,7 +14,8 @@ namespace RaidGroupFinder.Data.Configuration
         {
             builder.Property(p => p.Guid).IsRequired();
             builder.Property(p => p.Hatched).IsRequired();
-            builder.Property(p => p.Host).IsRequired();
+            builder.Property(p => p.Host).IsRequired().HasMaxLength(15);
+            builder.Property(p => p.HostUserId).IsRequired().HasMaxLength(450);
             builder.Property(p => p.Created).IsRequired();
             builder.Property(p => p.Active).IsRequired();
             builder.Property(p => p.Location).IsRequired().HasMaxLength(50);

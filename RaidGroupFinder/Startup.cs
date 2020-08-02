@@ -18,6 +18,7 @@ using Microsoft.Extensions.Hosting;
 using RaidGroupFinder.Areas.Identity;
 using RaidGroupFinder.Data;
 using RaidGroupFinder.Hubs;
+using TrainerCodeHubGroupFinder.Hubs;
 
 namespace RaidGroupFinder
 {
@@ -100,6 +101,7 @@ namespace RaidGroupFinder
                 endpoints.MapBlazorHub(); 
                 endpoints.MapHub<ChatHub>("/chathub");
                 endpoints.MapHub<RaidHub>("/raidhub");
+                endpoints.MapHub<TrainerCodeHub>("/trainercodehub");
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

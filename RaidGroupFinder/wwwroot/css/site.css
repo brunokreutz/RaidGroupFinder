@@ -18,9 +18,9 @@ a, .btn-link {
     height: -webkit-calc(100% - (20px + 30px));
     height: calc(100% - (20px + 30px));*/
     display: flex;
-    min-height: calc(100vh - 20vh );
+    min-height: calc(100vh - 22vh );
     overflow-y: scroll;
-    max-height: calc(100vh - 20vh );
+    max-height: calc(100vh - 22vh );
     flex-direction: column-reverse;
     margin: unset;
     max-width: none;
@@ -43,6 +43,7 @@ ul {
 .arrow {
     background-image: url(/icons/next-24.svg);
     background-position: center right;
+    background-repeat: no-repeat;
 }
 
 .raid-icon {
@@ -64,8 +65,24 @@ ul {
     background-color: #6610F2;
 }
 
-.bg-indianred{
+.bg-tier-5{
     background-color: indianred;
+}
+
+.bg-tier-4{
+    background-color: coral;
+}
+
+.bg-tier-3{
+    background-color:tan;
+}
+
+.bg-tier-2{
+    background-color: skyblue;
+}
+
+.bg-tier-1{
+    background-color: lightgreen;
 }
 
 .ui.card > .content.bg-card,
@@ -87,21 +104,16 @@ ul {
     float: right;
 }
 
-.bg-img {
-    background: radial-gradient(#ffa2a2, #a7132e);
-    min-width: 96px;
-    min-height: 96px;
-    max-width: 96px;
-    max-height: 96px;
-}
 
 .bg-img {
-    background: radial-gradient(#ffa2a2, #a7132e);
     min-width: 96px;
     min-height: 96px;
     max-width: 96px;
     max-height: 96px;
 }
+    .bg-img.tier-5 {
+        background: radial-gradient(#ffa2a2, #a7132e);
+    }
 
     .bg-img.inactive {
         background: rgb(133,133,133);
@@ -157,7 +169,7 @@ ul {
 }
 
 .btn-cpy {
-    border-color: #fff;
+    border-color: #191C2F;
 }
 
 app {

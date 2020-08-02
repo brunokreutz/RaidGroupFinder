@@ -1,28 +1,22 @@
 ﻿@page "/trainer-codes-list"
 @using Microsoft.AspNetCore.SignalR.Client
 @using RaidGroupFinder.Data
-@using System.Text.RegularExpressions
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject FixedSizedQueueService FixedSizedQueueService
 @implements IDisposable
 
-<h5 class="ui center aligned header text-white">
-    Pokemon GO Remote Raid Finder<br />
-    Find players to do remote raids with!<br />
-    Add trainers and invite them to raids!<br />
-    Add your trainer code to the list so other pokemon go players can invite you!
-</h5>
-<div class="container">
+   
+<div class="ui container">
     <div class="@StatusClass">@StatusMessage</div>
     <EditForm model="@trainerCode" class="ui fluid action input" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
         <DataAnnotationsValidator />
         @*<ValidationSummary />*@
         <input type="text" maxlength="14" class="fit" placeholder="Trainer Code" @bind="trainerCode.Value">
-        <button class="ui button btn-primary" disabled="@(!IsConnected)">Join the list</button>
+        <button class="ui button teal" disabled="@(!IsConnected)">Join the list</button>
     </EditForm>
     <div class="ui minimal comments">
-        <h4 class="ui dividing header">
+        <h4 class="ui dividing header text-white">
             Trainer Codes List (Most Recent):
         </h4>
         @if (messages != null)
@@ -34,14 +28,16 @@
         }
     </div>
 </div>
-            
+<Footer></Footer>
+
 @code {
     private HubConnection hubConnection;
     private List<string> messages = new List<string>();
     private TrainerCode trainerCode = new TrainerCode();
     private string StatusMessage;
     private string StatusClass;
-    private static readonly Regex sWhitespace = new Regex(@"\s+");
+
+
 
     protected void HandleInvalidSubmit()
     {
@@ -59,11 +55,11 @@
     protected override async Task OnInitializedAsync()
     {
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+            .WithUrl(NavigationManager.ToAbsoluteUri("/trainercodehub"))
             .WithAutomaticReconnect()
             .Build();
 
-        hubConnection.On<string,string>("ReceiveMessage", (usr, message) =>
+        hubConnection.On<string>("ReceiveMessage", (message) =>
         {
             messages.Add(message);
             StateHasChanged();
@@ -79,18 +75,17 @@
 
     Task Send()
     {
-        trainerCode.Value = ReplaceWhitespace(trainerCode.Value);
+        if (trainerCode.Value.Length == 12)
+        {
+            trainerCode.Value = $"{trainerCode.Value.Substring(0, 4)} {trainerCode.Value.Substring(4, 4)} {trainerCode.Value.Substring(8, 4)}";
+        }
         FixedSizedQueueService.Enqueue(trainerCode.Value);
-        return hubConnection.SendAsync("SendMessage", "", trainerCode.Value, "1", false);
+        return hubConnection.SendAsync("SendMessage", trainerCode.Value);
     }
 
-    private static string ReplaceWhitespace(string input)
-    {
-        return sWhitespace.Replace(input, "");
-    }
 
     public bool IsConnected =>
-    hubConnection.State == HubConnectionState.Connected;
+        hubConnection.State == HubConnectionState.Connected;
 
     public void Dispose()
     {

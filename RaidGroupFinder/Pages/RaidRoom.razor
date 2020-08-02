@@ -1,6 +1,7 @@
 ﻿@page "/raid/{Room:guid}"
 @using Microsoft.AspNetCore.SignalR.Client
 @using RaidGroupFinder.Data
+@using RaidGroupFinder.Data.Model 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @using Microsoft.AspNetCore.Identity;
 @inject UserManager<ApplicationUser> UserManager;
@@ -17,15 +18,15 @@
         <div class="ui minimal comments" id="chat">
             @if (Messages != null)
             {
-                @for(int i = Messages.Count -1; i >= 0; i--)
+                @for (int i = Messages.Count - 1; i >= 0; i--)
                 {
                     <div class="comment">
                         <div class="content">
                             @if (Messages[i].User == null)
                             {
-                            <div class="text" style="color:yellow">
-                                @Messages[i].Date.DateTime : @Messages[i].Message
-                            </div>
+                                <div class="text" style="color:yellow">
+                                    @Messages[i].Date.DateTime : @Messages[i].Message
+                                </div>
                             }
                             else
                             {
@@ -47,6 +48,11 @@
             <input class="form-control" type="text" placeholder="Coordinate the raid" @bind="@Message" @onkeyup="OnEnter">
             <button type="submit" class="btn btn-primary" disabled="@(!IsConnected)" @onclick="Send">Send</button>
         </div>
+        <div class="container" style="padding:0; position:absolute; top:0;">
+            <div class="one ui buttons" style="display:flex">
+                <button class="ui teal button" style="text-align:center" disabled="@Disabled" @onclick="Finish">Finish Raid</button>
+            </div>
+        </div>
     </Authorized>
 </AuthorizeView>
 
@@ -60,6 +66,9 @@
     private string User;
     private Dictionary<string, string> UserColor = new Dictionary<string, string>();
     private Random Random = new Random();
+    private bool Disabled = true;
+    private RaidBattle RaidBattle;
+    private string id;
 
     protected override async Task OnInitializedAsync()
     {
@@ -77,8 +86,15 @@
         {
             return;
         }
-        string id = user.Claims.Where(p => p.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Select(p => p.Value).FirstOrDefault();
+
         ApplicationUser currentUser = await UserManager.GetUserAsync(user);
+        id = currentUser.Id;
+        RaidBattle = await DbService.GetRaidBattle(Room);
+        if (RaidBattle.HostUserId == id)
+        {
+            Disabled = false;
+            base.StateHasChanged();
+        }
         User = $"{ currentUser.PokemonGoNickname} | {currentUser.TrainerCode}";
 
         var offset = TimeZoneInfo.FindSystemTimeZoneById(currentUser.TimeZone).BaseUtcOffset;
@@ -99,7 +115,7 @@
             SetColor(message);
         }
 
-        await HubConnection.SendAsync("SendMessage", User, Message, Room, id);
+        await HubConnection.SendAsync("SendMessage", User, Message, Room, id, false);
     }
 
     protected void SetColor(ChatHistory chat)
@@ -124,9 +140,19 @@
 
     protected void Send()
     {
-        HubConnection.SendAsync("SendMessage", User, Message, Room, null);
+        HubConnection.SendAsync("SendMessage", User, Message, Room, null, false);
         Message = "";
         base.StateHasChanged();
+    }
+
+    protected async void Finish()
+    {
+        if (RaidBattle.HostUserId == id)
+        {
+            await DbService.FinishRaid(RaidBattle);
+        }
+        await HubConnection.SendAsync("SendMessage", User, Message, Room, id, true);
+        NavigationManager.NavigateTo("/");
     }
 
     public bool IsConnected => HubConnection.State == HubConnectionState.Connected;
