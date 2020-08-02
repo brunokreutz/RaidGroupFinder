@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RaidGroupFinder.Data.Configuration;
 using RaidGroupFinder.Data.Model;
@@ -28,7 +25,7 @@ namespace RaidGroupFinder.Data
             builder.ApplyConfiguration(new PokemonConfiguration());
             builder.ApplyConfiguration(new RaidConfiguration());
             builder.ApplyConfiguration(new RaidBattleConfiguration());
-            
+
             base.OnModelCreating(builder);
         }
     }

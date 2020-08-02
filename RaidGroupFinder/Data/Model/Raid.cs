@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace RaidGroupFinder.Data.Model
+﻿namespace RaidGroupFinder.Data.Model
 {
     public class Raid
     {

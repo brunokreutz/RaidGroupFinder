@@ -1,6 +1,6 @@
 ﻿
-using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 namespace RaidGroupFinder.Data.Migrations
 {

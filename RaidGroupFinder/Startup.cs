@@ -1,15 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using BlazorSignalRApp.Server.Hubs;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +10,8 @@ using Microsoft.Extensions.Hosting;
 using RaidGroupFinder.Areas.Identity;
 using RaidGroupFinder.Data;
 using RaidGroupFinder.Hubs;
+using System;
+using System.Linq;
 using TrainerCodeHubGroupFinder.Hubs;
 
 namespace RaidGroupFinder
@@ -38,19 +32,19 @@ namespace RaidGroupFinder
             services.AddSignalR();
             //services.AddDbContext<ApplicationDbContext>(options =>
             //    options.UseSqlServer(Environment.GetEnvironmentVariable("ConnectionString")));
-            services.AddDbContext<ApplicationDbContext>( options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
+            services.AddDbContext<ApplicationDbContext>(options =>
+               options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
 
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            
+
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
-            services.AddTransient<DbService>(); 
+            services.AddTransient<DbService>();
             services.AddSingleton<FixedSizedQueueService>();
             //services.AddScoped<TokenProvider>();
-            
+
             services.AddControllersWithViews();
             services.AddResponseCompression(opts =>
             {
@@ -59,9 +53,9 @@ namespace RaidGroupFinder
             });
             services.AddAuthentication().AddGoogle(options =>
             {
-                options.ClientId = Environment.GetEnvironmentVariable("AGClientId"); 
+                options.ClientId = Environment.GetEnvironmentVariable("AGClientId");
                 options.ClientSecret = Environment.GetEnvironmentVariable("AGClientSecret");
-                
+
                 //// Must have this to populate the tokens ...
                 //options.SaveTokens = true;
 
@@ -98,7 +92,7 @@ namespace RaidGroupFinder
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
-                endpoints.MapBlazorHub(); 
+                endpoints.MapBlazorHub();
                 endpoints.MapHub<ChatHub>("/chathub");
                 endpoints.MapHub<RaidHub>("/raidhub");
                 endpoints.MapHub<TrainerCodeHub>("/trainercodehub");

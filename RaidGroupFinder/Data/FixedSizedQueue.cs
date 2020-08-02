@@ -18,7 +18,7 @@ namespace RaidGroupFinder.Data
             {
                 base.Enqueue(item);
                 if (Count > maxQueueSize)
-                    Dequeue(); 
+                    Dequeue();
             }
         }
     }

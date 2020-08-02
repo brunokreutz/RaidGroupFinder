@@ -1,10 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RaidGroupFinder.Data.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace RaidGroupFinder.Data.Configuration
 {
@@ -12,7 +8,7 @@ namespace RaidGroupFinder.Data.Configuration
     {
         public void Configure(EntityTypeBuilder<Connection> builder)
         {
-            builder.Property(p => p.Id).IsRequired().ValueGeneratedOnAdd(); 
+            builder.Property(p => p.Id).IsRequired().ValueGeneratedOnAdd();
             builder.Property(p => p.Room).IsRequired();
             builder.Property(p => p.Active).IsRequired();
             builder.Property(p => p.ConnectionID).IsRequired();

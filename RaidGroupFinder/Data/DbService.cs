@@ -23,7 +23,7 @@ namespace RaidGroupFinder.Data
 
         public async Task<List<ChatHistory>> GetGroupHistory(Guid group)
         {
-            return await context.ChatHistories.Where(p => p.Group == group).OrderBy(p=> p.Date).ToListAsync();
+            return await context.ChatHistories.Where(p => p.Group == group).OrderBy(p => p.Date).ToListAsync();
         }
 
         public async Task AddConnection(Connection connection)
@@ -53,7 +53,7 @@ namespace RaidGroupFinder.Data
 
         public async Task<List<RaidBattle>> GetActiveRaidBattles()
         {
-            return await context.RaidBattles.Include(p=> p.Raid).Include(p => p.Raid.Pokemon).Where(p => p.Hatched > DateTime.UtcNow.AddMinutes(-45) && p.Active).OrderBy(p => p.Created).ToListAsync();
+            return await context.RaidBattles.Include(p => p.Raid).Include(p => p.Raid.Pokemon).Where(p => p.Hatched > DateTime.UtcNow.AddMinutes(-45) && p.Active).OrderBy(p => p.Created).ToListAsync();
         }
         public async Task<List<RaidBattle>> GetLastInactiveRaidBattles()
         {
