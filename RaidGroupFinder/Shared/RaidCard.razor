@@ -2,9 +2,10 @@
 @inject NavigationManager NavigationManager
 @inject RaidGroupFinder.Data.DbService DbService
 
-<div class="ui grid bg-indianred raid-card" @onclick="JoinRoom">
-    <img src="@IconPath" class="five wide column bg-img">
-    <div class="nine wide column padding-bottom-10 padding-top-10">
+
+<div class="ui grid @Bg raid-card" @onclick="JoinRoom">
+    <img src="@IconPath" class="five wide column bg-img @Status">
+    <div class="ten wide column padding-bottom-10 padding-top-10">
         <div class="header">
             <div class="float-right">
                 @*@for (int i = 0; i < RaidBattle.Raid.Tier; i++)
@@ -12,27 +13,34 @@
                     <img src="/icons/raid-icon-24.png" class="raid-icon" />
                 }*@
                 <div class="float-right">
-                    Tier @RaidBattle.Raid.Tier
+                    <b>Tier @RaidBattle.Raid.Tier</b>
                 </div>
             </div>
-            <div class="text-white text-xl-left">@RaidBattle.Raid.Pokemon.Name</div>
+            <div class="text-white text-xl-left"><b>@RaidBattle.Raid.Pokemon.Name</b></div>
 
-            <div class="text-white">Host: @RaidBattle.Host</div>
+            <div class="text-white">Host: <b>@RaidBattle.Host</b></div>
             @if (OffSet == null)
             {
-                <div class="text-white">Hatched: @RaidBattle.Hatched.ToShortTimeString()</div>
+                <div class="text-white truncate">Hatched <b>@RaidBattle.Hatched.ToShortTimeString()</b> at @RaidBattle.Location</div>
             }
             else
             {
-                <div class="text-white">Hatched: @RaidBattle.Hatched.Add(OffSet).ToShortTimeString()</div>
+                <div class="text-white truncate">Hatched <b>@RaidBattle.Hatched.Add(OffSet).ToShortTimeString()</b> at @RaidBattle.Location</div>
             }
-            <div class="text-white">Players: (@Players/6)</div>
+            @if (Active)
+            {
+            <div class="text-white">Players: <b>(@Players/6)</b></div>
+            }
         </div>
     </div>
-    <div class="two wide column d-flex align-items-center">
+    @if (Active)
+    {
+    <div class="align-items-center arrow">
         <img src="/icons/next-24.svg" />
     </div>
+    }
 </div>
+
 @code {
     [Parameter]
     public RaidBattle RaidBattle { get; set; }
@@ -40,16 +48,31 @@
     public string IconPath { get; set; }
     [Parameter]
     public TimeSpan OffSet { get; set; }
+    [Parameter]
+    public bool Active { get; set; }
 
-    private int Players = 1; 
+    private string Status = "inactive";
+    private string Bg = "bg-dark";
+
+    private int Players = 1;
 
     void JoinRoom()
     {
-        NavigationManager.NavigateTo($"raid/{RaidBattle.Guid}");
+        if (Active)
+        {
+            NavigationManager.NavigateTo($"raid/{RaidBattle.Guid}");
+        }
     }
     protected override async Task OnInitializedAsync()
     {
-        Players = await DbService.GetPlayersInRaidRoom(RaidBattle.Guid);
+        if (Active)
+        {
+            Bg = "bg-indianred arrow";
+            Status = ""; 
+            Players = await DbService.GetPlayersInRaidRoom(RaidBattle.Guid);
+        }
+
+
         StateHasChanged();
     }
 }

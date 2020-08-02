@@ -51,10 +51,11 @@
     </AuthorizeView>
 
 @code {
-    private List<Raid> Raids { get; set; }
+    private List<Raid> Raids;
     private InputModel Input = new InputModel();
-    private ApplicationUser CurrentUser { get; set; }
-    private TimeSpan Offset { get; set; }
+    private ApplicationUser CurrentUser;
+    private TimeSpan Offset;
+    private HubConnection hubConnection;
 
     public class InputModel
     {
@@ -89,10 +90,19 @@
         Guid guid = Guid.NewGuid();
         var raidBattle = new RaidBattle()
         {
-            Hatched = Input.Hatched.Subtract(Offset), Guid = guid, Host = CurrentUser.PokemonGoNickname, Location = Input.Location ?? CurrentUser.TimeZone, Created = DateTime.UtcNow,
+            Hatched = Input.Hatched.Subtract(Offset), Guid = guid, Host = CurrentUser.PokemonGoNickname,Created = DateTime.UtcNow,
+            Location = Input.Location ?? CurrentUser.TimeZone,
             Raid = Raids.FirstOrDefault(p => p.Id.ToString() == Input.Pokemon)
         };
         await DbService.CreateRaidBattle(raidBattle);
+
+        hubConnection = new HubConnectionBuilder()
+           .WithUrl(NavigationManager.ToAbsoluteUri("/raidhub"))
+           .WithAutomaticReconnect()
+           .Build();
+
+        await hubConnection.StartAsync();
+        await hubConnection.SendAsync("SendMessage", raidBattle);
 
         NavigationManager.NavigateTo($"raid/{guid}");
     }

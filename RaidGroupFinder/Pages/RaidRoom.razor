@@ -19,16 +19,25 @@
             {
                 @for(int i = Messages.Count -1; i >= 0; i--)
                 {
-                    var color = UserColor.GetValueOrDefault(Messages[i].User);
                     <div class="comment">
                         <div class="content">
-                            <div class="d-inline author" style="color:@color"> @Messages[i].User</div>
-                            <div class="metadata">
-                                <span class="date text-white-50">@Messages[i].Date.DateTime</span>
+                            @if (Messages[i].User == null)
+                            {
+                            <div class="text" style="color:yellow">
+                                @Messages[i].Date.DateTime : @Messages[i].Message
                             </div>
-                            <div class="text text-white">
-                                @Messages[i].Message
-                            </div>
+                            }
+                            else
+                            {
+                                var color = UserColor.GetValueOrDefault(Messages[i].User);
+                                <div class="d-inline author" style="color:@color"> @Messages[i].User</div>
+                                <div class="metadata">
+                                    <span class="date text-white-50">@Messages[i].Date.DateTime</span>
+                                </div>
+                                <div class="text text-white">
+                                    @Messages[i].Message
+                                </div>
+                            }
                         </div>
                     </div>
                 }
@@ -71,7 +80,6 @@
         string id = user.Claims.Where(p => p.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Select(p => p.Value).FirstOrDefault();
         ApplicationUser currentUser = await UserManager.GetUserAsync(user);
         User = $"{ currentUser.PokemonGoNickname} | {currentUser.TrainerCode}";
-        UserColor.Add("BOT", "#00FF00");
 
         var offset = TimeZoneInfo.FindSystemTimeZoneById(currentUser.TimeZone).BaseUtcOffset;
 
@@ -96,7 +104,7 @@
 
     protected void SetColor(ChatHistory chat)
     {
-        if (chat.User != "BOT")
+        if (chat.User != null)
         {
             try
             {

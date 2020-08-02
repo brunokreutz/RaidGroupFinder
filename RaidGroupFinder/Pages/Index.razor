@@ -10,14 +10,17 @@
 @using Microsoft.AspNetCore.Identity;
 @inject UserManager<ApplicationUser> UserManager
 
-<MainMessage></MainMessage>
+<h5 class="ui center aligned header text-white">
+    Pokemon GO Remote Raid Finder<br />
+    Find players to do remote raids with!<br />
+</h5>
 <div class="two ui buttons">
     <button class="ui orange button" @onclick="RaidRoom">Host a Raid</button>
     <button class="ui btn-primary button">Tainer Codes List</button>
 </div>
 <div class="ui stackable two column grid">
     <div class="column text-white">
-        <h3> Active Raids</h3>
+        <h3 class="margin-top-13"> Active Raids</h3>
         @if (RaidBattles != null)
         {
             foreach (var rb in RaidBattles)
@@ -31,17 +34,34 @@
                 {
                     iconPath = $"/icons/pokemon64x64/{rb.Raid.Pokemon.Name}-{rb.Raid.Pokemon.Form}.png";
                 }
-                <RaidCard RaidBattle="@rb" IconPath="@iconPath" OffSet="@Offset"></RaidCard>
+                <RaidCard RaidBattle="@rb" IconPath="@iconPath" OffSet="@Offset" Active="true"></RaidCard>
             }
         }
     </div>
     <div class="column text-white">
-        <h3> Last Raids</h3>
+        <h3 class="margin-top-13"> Last Raids</h3>
+        @if (LastRaidBattles != null)
+        {
+            foreach (var rb in LastRaidBattles)
+            {
+                string iconPath;
+                if (rb.Raid.Pokemon.Form == "normal")
+                {
+                    iconPath = $"/icons/pokemon64x64/{rb.Raid.Pokemon.Number}.png";
+                }
+                else
+                {
+                    iconPath = $"/icons/pokemon64x64/{rb.Raid.Pokemon.Name}-{rb.Raid.Pokemon.Form}.png";
+                }
+                <RaidCard RaidBattle="@rb" IconPath="@iconPath" OffSet="@Offset" Active="false"></RaidCard>
+            }
+        }
     </div>
 </div>
 
 @code{
     private List<RaidBattle> RaidBattles;
+    private List<RaidBattle> LastRaidBattles;
     private TimeSpan Offset;
     private HubConnection hubConnection;
     public void RaidRoom()
@@ -52,6 +72,7 @@
     protected override async Task OnInitializedAsync()
     {
         RaidBattles = await DbService.GetActiveRaidBattles();
+        LastRaidBattles = await DbService.GetLastInactiveRaidBattles();
 
         hubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/raidhub"))

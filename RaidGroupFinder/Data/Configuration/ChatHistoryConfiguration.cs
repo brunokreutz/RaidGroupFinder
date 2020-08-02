@@ -14,7 +14,7 @@ namespace RaidGroupFinder.Data.Configuration
             builder.HasKey(p => p.Guid);
             builder.Property(p => p.Group).IsRequired();
             builder.Property(p => p.Date).IsRequired();
-            builder.Property(p => p.User).IsRequired();
+            builder.Property(p => p.User).HasMaxLength(32);
             builder.HasIndex(p => p.Group);
             builder.HasIndex(p => p.Date);
         }

@@ -53,7 +53,11 @@ namespace RaidGroupFinder.Data
 
         public async Task<List<RaidBattle>> GetActiveRaidBattles()
         {
-            return await context.RaidBattles.Include(p=> p.Raid).Include(p => p.Raid.Pokemon).Where(p => p.Hatched < DateTime.UtcNow.AddMinutes(45)).OrderByDescending(p => p.Created).ToListAsync();
+            return await context.RaidBattles.Include(p=> p.Raid).Include(p => p.Raid.Pokemon).Where(p => p.Hatched > DateTime.UtcNow.AddMinutes(-45)).OrderByDescending(p => p.Created).ToListAsync();
+        }
+        public async Task<List<RaidBattle>> GetLastInactiveRaidBattles()
+        {
+            return await context.RaidBattles.Include(p => p.Raid).Include(p => p.Raid.Pokemon).Where(p => p.Hatched < DateTime.UtcNow.AddMinutes(-45)).OrderByDescending(p => p.Created).Take(5).ToListAsync();
         }
 
         public async Task<int> GetPlayersInRaidRoom(Guid guid)

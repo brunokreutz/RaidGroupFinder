@@ -10,7 +10,7 @@ namespace BlazorSignalRApp.Server.Hubs
 {
     public class ChatHub : Hub
     {
-        private const string BOT = "BOT";
+        public const string BOT = null;
 
         private readonly DbService ChatDbService;
 
