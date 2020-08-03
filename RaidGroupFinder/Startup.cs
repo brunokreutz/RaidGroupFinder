@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using RaidGroupFinder.Areas.Identity;
 using RaidGroupFinder.Data;
 using RaidGroupFinder.Hubs;
 using System;
@@ -18,10 +17,13 @@ namespace RaidGroupFinder
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             Configuration = configuration;
+            WebHostEnvironment = webHostEnvironment;
         }
+
+        private IWebHostEnvironment WebHostEnvironment { get; set; } 
 
         public IConfiguration Configuration { get; }
 
@@ -29,18 +31,20 @@ namespace RaidGroupFinder
         {
             services.AddSignalR();
 
-            //services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(Environment.GetEnvironmentVariable("ConnectionString")), ServiceLifetime.Transient);
+            if (WebHostEnvironment.IsDevelopment())
+            {
+                services.AddDbContext<ApplicationDbContext>(
+                    options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(
+                    options => options.UseSqlServer(Environment.GetEnvironmentVariable("ConnectionString")), ServiceLifetime.Transient);
+            }
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-               options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
-
-            //services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-            //    .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddRazorPages();
             services.AddServerSideBlazor();
 
-            services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
             services.AddTransient<DbService>();
             services.AddSingleton<FixedSizedQueueService>();
 
@@ -50,20 +54,7 @@ namespace RaidGroupFinder
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                     new[] { "application/octet-stream" });
             });
-            services.AddAuthentication().AddGoogle(options =>
-            {
-                options.ClientId = Environment.GetEnvironmentVariable("AGClientId");
-                options.ClientSecret = Environment.GetEnvironmentVariable("AGClientSecret");
-
-                //// Must have this to populate the tokens ...
-                //options.SaveTokens = true;
-
-                //// When mapped, Google properties become claims. For example ...
-                //options.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
-            });
-
-
-
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

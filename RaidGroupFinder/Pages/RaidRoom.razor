@@ -153,10 +153,10 @@
             SetColor(message);
         }
 
+        RaidBattle = await DbService.GetRaidBattle(Room);
         var cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.GetCookie");
         if (cookie != "" && cookie != null)
         {
-            RaidBattle = await DbService.GetRaidBattle(Room);
             (User, id) = EncodeHelper.DismemberTrainerTitle(EncodeHelper.DecodeFrom64(cookie));
             ModalActive = "";
             if (RaidBattle.HostUserId == id)

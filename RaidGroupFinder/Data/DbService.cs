@@ -63,7 +63,7 @@ namespace RaidGroupFinder.Data
         public async Task<int> GetPlayersInRaidRoom(Guid guid)
         {
             return await context.Connections.Where(p => p.Active && p.Room == guid).CountAsync();
-            
+
         }
 
         public async Task<RaidBattle> GetRaidBattle(Guid guid)

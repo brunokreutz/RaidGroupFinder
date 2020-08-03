@@ -38,7 +38,7 @@
                     }
                 </InputSelect>
                 <label>Hatchs</label>
-                <input type="datetime-local" class="form-control border-bottom-10" @bind="Input.Hatched">
+                <RaidGroupFinder.Helper.InputDateTime @bind-Value="Input.Hatched" class="form-control  border-bottom-10"> </RaidGroupFinder.Helper.InputDateTime>
                 <label>Pokemon Go Nickname</label>
                 <input type="text" maxlength="15" class="form-control border-bottom-10" @bind="Input.PokemonGoNickname" />
                 <label> Trainer Code </label>
@@ -91,36 +91,41 @@
         Input.Hatched = DateTime.UtcNow.Add(Offset);
         Input.Hatched = Input.Hatched.AddSeconds(-Input.Hatched.Second);
         Raids = await DbService.GetActiveRaids();
+        var cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.GetCookie");
+        if (cookie != "" && cookie != null)
+        {
+            (Input.PokemonGoNickname, Input.TrainerCode) = EncodeHelper.DismemberTrainerTitle(EncodeHelper.DecodeFrom64(cookie));
+        }
         StateHasChanged();
     }
 
-    protected async Task HandleValidSubmit()
-    {
-        Input.TrainerCode = RegexHelper.ReplaceWhitespace(Input.TrainerCode);
-        Guid guid = Guid.NewGuid();
-        var raidBattle = new RaidBattle()
+        protected async Task HandleValidSubmit()
         {
-            Hatched = Input.Hatched.Subtract(Offset), Guid = guid,
-            //Host = CurrentUser.PokemonGoNickname,
-            Host = Input.PokemonGoNickname,
-            Created = DateTime.UtcNow,
-            //HostUserId = CurrentUser.Id,
-            HostUserId = Input.TrainerCode,
-            //Location = Input.Location ?? CurrentUser.TimeZone,
-            Location = "",
-            Active = true,
-            Raid = Raids.FirstOrDefault(p => p.Id.ToString() == Input.Pokemon)
-        };
-        await DbService.CreateRaidBattle(raidBattle);
+            Input.TrainerCode = RegexHelper.ReplaceWhitespace(Input.TrainerCode);
+            Guid guid = Guid.NewGuid();
+            var raidBattle = new RaidBattle()
+            {
+                Hatched = Input.Hatched.Subtract(Offset), Guid = guid,
+                //Host = CurrentUser.PokemonGoNickname,
+                Host = Input.PokemonGoNickname,
+                Created = DateTime.UtcNow,
+                //HostUserId = CurrentUser.Id,
+                HostUserId = Input.TrainerCode,
+                //Location = Input.Location ?? CurrentUser.TimeZone,
+                Location = "",
+                Active = true,
+                Raid = Raids.FirstOrDefault(p => p.Id.ToString() == Input.Pokemon)
+            };
+            await DbService.CreateRaidBattle(raidBattle);
 
-        hubConnection = new HubConnectionBuilder()
-           .WithUrl(NavigationManager.ToAbsoluteUri("/raidhub"))
-           .WithAutomaticReconnect()
-           .Build();
+            hubConnection = new HubConnectionBuilder()
+               .WithUrl(NavigationManager.ToAbsoluteUri("/raidhub"))
+               .WithAutomaticReconnect()
+               .Build();
 
-        await hubConnection.StartAsync();
-        await hubConnection.SendAsync("SendMessage", raidBattle);
+            await hubConnection.StartAsync();
+            await hubConnection.SendAsync("SendMessage", raidBattle);
 
-        NavigationManager.NavigateTo($"raid/{guid}");
+            NavigationManager.NavigateTo($"raid/{guid}");
+        }
     }
-}

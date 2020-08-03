@@ -13,7 +13,6 @@
     <Compile Remove="Data\Migrations\20200801180125_pokeRaid.Designer.cs" />
     <Compile Remove="Data\Migrations\20200801180913_pokeRaid2.cs" />
     <Compile Remove="Data\Migrations\20200801180913_pokeRaid2.Designer.cs" />
-    <Compile Remove="Helper\InputDateTime.cs" />
   </ItemGroup>
 
   <ItemGroup>

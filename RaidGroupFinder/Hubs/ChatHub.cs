@@ -3,7 +3,6 @@ using RaidGroupFinder.Data;
 using RaidGroupFinder.Data.Model;
 using RaidGroupFinder.Helper;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlazorSignalRApp.Server.Hubs

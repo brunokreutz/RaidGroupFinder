@@ -11,11 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - RaidGroupFinder</title>
     <base href="~/" />
-    @*<link rel="stylesheet" href="~/Identity/lib/bootstrap/dist/css/bootstrap.min.css" />*@
-   @* <link rel="stylesheet" href="~/Identity/css/site.css" />*@
-    @*<link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />*@
     <link rel="stylesheet" href="/css/site.css" />
-    <!-- Global site tag (gtag.js) - Google Analytics -->
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-172953101-1"></script>
     <script>
@@ -36,19 +32,11 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-lg-inline-flex flex-lg-row-reverse">
-                    @{
-                        var result = Engine.FindView(ViewContext, "_LoginPartial", isMainPage: false);
-                    }
-                    @if (result.Success)
-                    {
-                        await Html.RenderPartialAsync("_LoginPartial");
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("The default Identity UI layout requires a partial view '_LoginPartial' " +
-                            "usually located at '/Pages/_LoginPartial' or at '/Views/Shared/_LoginPartial' to work. Based on your configuration " +
-                            $"we have looked at it in the following locations: {System.Environment.NewLine}{string.Join(System.Environment.NewLine, result.SearchedLocations)}.");
-                    }
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/trainer-codes-list">Trainer Codes List</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>

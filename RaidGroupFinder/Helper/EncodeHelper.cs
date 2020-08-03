@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace RaidGroupFinder.Helper
 {
@@ -23,13 +21,13 @@ namespace RaidGroupFinder.Helper
             return returnValue;
         }
 
-        static public (string pokemonGoName,string trainerCode) DismemberTrainerTitle(string user)
+        static public (string pokemonGoName, string trainerCode) DismemberTrainerTitle(string user)
         {
-            var splits = user.Split(" |");
+            var splits = user.Split(" | ");
             return (splits.First(), splits.Last());
         }
 
-        static public string CreateTrainerTitle(string pokemonGoNickname,string trainerCode)
+        static public string CreateTrainerTitle(string pokemonGoNickname, string trainerCode)
         {
             return $"{ pokemonGoNickname} | {trainerCode}";
         }
