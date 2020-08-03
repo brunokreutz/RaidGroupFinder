@@ -1,60 +1,79 @@
 ﻿@page "/raid/{Room:guid}"
 @using Microsoft.AspNetCore.SignalR.Client
 @using RaidGroupFinder.Data
-@using RaidGroupFinder.Data.Model 
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@using Microsoft.AspNetCore.Identity;
-@inject UserManager<ApplicationUser> UserManager;
+@using RaidGroupFinder.Data.Model
+@using System.ComponentModel.DataAnnotations;
+@using Helper;
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject DbService DbService
 @implements IDisposable
 
-<AuthorizeView>
-    <NotAuthorized>
-        <h2 class="text-white">You need to <a href="Identity/Account/Login">Login</a> first</h2>
-    </NotAuthorized>
-    <Authorized>
-        <div class="ui minimal comments" id="chat">
-            @if (Messages != null)
-            {
-                @for (int i = Messages.Count - 1; i >= 0; i--)
-                {
-                    <div class="comment">
-                        <div class="content">
-                            @if (Messages[i].User == null)
-                            {
-                                <div class="text" style="color:yellow">
-                                    @Messages[i].Date.DateTime : @Messages[i].Message
-                                </div>
-                            }
-                            else
-                            {
-                                var color = UserColor.GetValueOrDefault(Messages[i].User);
-                                <div class="d-inline author" style="color:@color"> @Messages[i].User</div>
-                                <div class="metadata">
-                                    <span class="date text-white-50">@Messages[i].Date.DateTime</span>
-                                </div>
-                                <div class="text text-white">
-                                    @Messages[i].Message
-                                </div>
-                            }
+<div class="ui minimal comments" id="chat">
+    @if (Messages != null)
+    {
+        @for (int i = Messages.Count - 1; i >= 0; i--)
+        {
+            <div class="comment">
+                <div class="content">
+                    @if (Messages[i].User == null)
+                    {
+                        <div class="text" style="color:yellow">
+                            @Messages[i].Date.DateTime : @Messages[i].Message
                         </div>
-                    </div>
-                }
-            }
-        </div>
-        <div class="form-group fit d-flex" context="Another">
-            <input class="form-control" type="text" placeholder="Coordinate the raid" @bind="@Message" @onkeyup="OnEnter">
-            <button type="submit" class="btn btn-primary" disabled="@(!IsConnected)" @onclick="Send">Send</button>
-        </div>
-        <div class="container" style="padding:0; position:absolute; top:0;">
-            <div class="one ui buttons" style="display:flex">
-                <button class="ui teal button" style="text-align:center" disabled="@Disabled" @onclick="Finish">Finish Raid</button>
+                    }
+                    else
+                    {
+                        var color = UserColor.GetValueOrDefault(Messages[i].User);
+                        <div class="d-inline author" style="color:@color"> @Messages[i].User</div>
+                        <div class="metadata">
+                            <span class="date text-white-50">@Messages[i].Date.DateTime</span>
+                        </div>
+                        <div class="text text-white">
+                            @Messages[i].Message
+                        </div>
+                    }
+                </div>
             </div>
+        }
+    }
+</div>
+<div class="form-group fit d-flex" context="Another">
+    <input class="form-control" type="text" placeholder="Coordinate the raid" @bind="@Message" @onkeyup="OnEnter">
+    <button type="submit" class="btn btn-primary" disabled="@(!IsConnected)" @onclick="Send">Send</button>
+</div>
+<div class="container" style="padding:0; position:absolute; top:0;">
+    <div class="one ui buttons" style="display:flex">
+        <button class="ui teal button" style="text-align:center" disabled="@Disabled" @onclick="Finish">Finish Raid</button>
+    </div>
+</div>
+
+<div class="bm-container @ModalActive">
+    <div class="bm-overlay"></div> 
+    <div class="blazor-modal">
+        <div class="bm-header">
+            <h3 class="bm-title">Add your Trainer Info to join the room</h3>
         </div>
-    </Authorized>
-</AuthorizeView>
+        <div class="bm-content">
+            <EditForm Model="@Input" OnValidSubmit="@SubmitForm" class="simple-form">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-group">
+                    <label for="last-name">PokemonGo Nickname</label>
+                    <input @bind="Input.PokemonGoNickname" type="text" class="form-control border-bottom-10" />
+                    <label for="first-name">Trainer Code</label>
+                    <input @bind="Input.TrainerCode" type="text" class="form-control border-bottom-10" />
+                    <label>Save my Information </label>
+                    <InputCheckbox @bind-Value="Input.SaveInfo"></InputCheckbox>
+                </div>
+                <button class="btn btn-primary">Submit</button>
+            </EditForm>
+        </div>
+    </div>
+
+</div>
+
+
 
 @code {
     [Parameter]
@@ -69,6 +88,43 @@
     private bool Disabled = true;
     private RaidBattle RaidBattle;
     private string id;
+    private string ModalActive = "";
+    private InputModel Input = new InputModel();
+
+    public class InputModel
+    {
+        [Required]
+        [StringLength(15, ErrorMessage = "Nickname is Too Long")]
+        public string PokemonGoNickname { get; set; }
+        [Required]
+        [RegularExpression("[0-9]{4}[ ][0-9]{4}[ ][0-9]{4}|[0-9]{12}", ErrorMessage = "Invalid Trainer Code!")]
+        public string TrainerCode { get; set; }
+        public bool SaveInfo { get; set; }
+    }
+
+    public void CloseModal()
+    {
+        ModalActive = "";
+        StateHasChanged();
+    }
+
+    public async Task SubmitForm()
+    {
+        ModalActive = "";
+        id = RegexHelper.ReplaceWhitespace(Input.TrainerCode);
+        User = EncodeHelper.CreateTrainerTitle(Input.PokemonGoNickname,id);
+        await HubConnection.SendAsync("SendMessage", User, Message, Room, id, false);
+        if (RaidBattle.HostUserId == id)
+        {
+            Disabled = false;
+        }
+        if (Input.SaveInfo)
+        {
+            await JSRuntime.InvokeAsync<string>("blazorExtensions.WriteCookie", EncodeHelper.EncodeTo64(User), 365);
+        }
+
+        StateHasChanged();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -79,30 +135,12 @@
 
         await HubConnection.StartAsync();
 
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (!user.Identity.IsAuthenticated)
-        {
-            return;
-        }
-
-        ApplicationUser currentUser = await UserManager.GetUserAsync(user);
-        id = currentUser.Id;
-        RaidBattle = await DbService.GetRaidBattle(Room);
-        if (RaidBattle.HostUserId == id)
-        {
-            Disabled = false;
-            base.StateHasChanged();
-        }
-        User = $"{ currentUser.PokemonGoNickname} | {currentUser.TrainerCode}";
-
-        var offset = TimeZoneInfo.FindSystemTimeZoneById(currentUser.TimeZone).BaseUtcOffset;
+        //var offset = TimeZoneInfo.FindSystemTimeZoneById(currentUser.TimeZone).BaseUtcOffset;
 
         HubConnection.On<ChatHistory>("ReceiveMessage", (chat) =>
         {
             SetColor(chat);
-            chat.Date = chat.Date.ToOffset(offset);
+            //chat.Date = chat.Date.ToOffset(offset);
             Messages.Add(chat);
             base.StateHasChanged();
         });
@@ -111,11 +149,28 @@
 
         foreach (var message in Messages)
         {
-            message.Date = message.Date.ToOffset(offset); ;
+            //message.Date = message.Date.ToOffset(offset); ;
             SetColor(message);
         }
 
-        await HubConnection.SendAsync("SendMessage", User, Message, Room, id, false);
+        var cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.GetCookie");
+        if (cookie != "" && cookie != null)
+        {
+            RaidBattle = await DbService.GetRaidBattle(Room);
+            (User, id) = EncodeHelper.DismemberTrainerTitle(EncodeHelper.DecodeFrom64(cookie));
+            ModalActive = "";
+            if (RaidBattle.HostUserId == id)
+            {
+                Disabled = false;
+            }
+            await HubConnection.SendAsync("SendMessage", User, Message, Room, id, false);
+            StateHasChanged();
+        }
+        else
+        {
+            ModalActive = "bm-active";
+            StateHasChanged();
+        }
     }
 
     protected void SetColor(ChatHistory chat)

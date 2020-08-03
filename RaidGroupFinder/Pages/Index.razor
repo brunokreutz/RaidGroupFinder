@@ -5,9 +5,9 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject DbService DbService
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@using Microsoft.AspNetCore.Identity;
-@inject UserManager<ApplicationUser> UserManager
+@*@inject AuthenticationStateProvider AuthenticationStateProvider*@
+@*@using Microsoft.AspNetCore.Identity;
+@inject UserManager<ApplicationUser> UserManager*@
 
 <h5 class="ui center aligned header text-white">
     Pokemon GO Remote Raid Finder<br />
@@ -92,17 +92,17 @@
             StateHasChanged();
         });
 
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        //var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        //var user = authState.User;
 
-        if (!user.Identity.IsAuthenticated)
-        {
-            StateHasChanged();
-            return;
-        }
-        string id = user.Claims.Where(p => p.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Select(p => p.Value).FirstOrDefault();
-        ApplicationUser currentUser = await UserManager.GetUserAsync(user);
-        Offset = TimeZoneInfo.FindSystemTimeZoneById(currentUser.TimeZone).BaseUtcOffset;
+        //if (!user.Identity.IsAuthenticated)
+        //{
+        //    StateHasChanged();
+        //    return;
+        //}
+        //string id = user.Claims.Where(p => p.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Select(p => p.Value).FirstOrDefault();
+        //ApplicationUser currentUser = await UserManager.GetUserAsync(user);
+        //Offset = TimeZoneInfo.FindSystemTimeZoneById(currentUser.TimeZone).BaseUtcOffset;
         StateHasChanged();
     }
 }

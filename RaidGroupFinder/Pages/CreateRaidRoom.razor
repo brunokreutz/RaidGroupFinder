@@ -6,17 +6,17 @@
 @using Microsoft.AspNetCore.Mvc.Rendering;
 @using System.ComponentModel.DataAnnotations;
 @using Helper
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@using Microsoft.AspNetCore.Identity;
-@inject UserManager<ApplicationUser> UserManager;
+@*@inject AuthenticationStateProvider AuthenticationStateProvider*@
+@*@using Microsoft.AspNetCore.Identity;
+@inject UserManager<ApplicationUser> UserManager;*@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject DbService DbService
-<AuthorizeView>
+@*<AuthorizeView>
     <NotAuthorized>
 <h2 class="text-white">You need to <a href="Identity/Account/Login">Login</a> first</h2>
 </NotAuthorized>
-    <Authorized >
+    <Authorized >*@
 <h2 class="text-white">Create Raid Room</h2>
 <div class="row">
     <div class="col-md-6 col-md-offset-3">
@@ -39,21 +39,25 @@
                 </InputSelect>
                 <label>Hatchs</label>
                 <input type="datetime-local" class="form-control border-bottom-10" @bind="Input.Hatched">
-                <label>Location (Optional)</label>
-                <input type="text" maxlength="50" class="form-control border-bottom-10" @bind="Input.Location">
+                <label>Pokemon Go Nickname</label>
+                <input type="text" maxlength="15" class="form-control border-bottom-10" @bind="Input.PokemonGoNickname" />
+                <label> Trainer Code </label>
+                <input type="text" maxlength="14" class="form-control border-bottom-10" @bind="Input.TrainerCode" />
+                @*<label>Location (Optional)</label>
+                <input type="text" maxlength="50" class="form-control border-bottom-10" @bind="Input.Location">*@
                 <button class="ui button btn-primary">Create Raid</button>
             </div>
         </EditForm>
 
     </div>
 </div>
-</Authorized>
-    </AuthorizeView>
+@*</Authorized>
+    </AuthorizeView>*@
 
 @code {
     private List<Raid> Raids;
     private InputModel Input = new InputModel();
-    private ApplicationUser CurrentUser;
+    //private ApplicationUser CurrentUser;
     private TimeSpan Offset;
     private HubConnection hubConnection;
 
@@ -62,23 +66,28 @@
         public DateTime Hatched { get; set; }
         [Required]
         public string Pokemon { get; set; }
-        [StringLength(50, ErrorMessage = "Location is Too Long")]
-        public string Location { get; set; }
+        //[StringLength(50, ErrorMessage = "Location is Too Long")]
+        //public string Location { get; set; }
+        [Required]
+        [StringLength(15, ErrorMessage = "Nickname is Too Long")]
+        public string PokemonGoNickname { get; set; }
+        [Required]
+        [RegularExpression("[0-9]{4}[ ][0-9]{4}[ ][0-9]{4}|[0-9]{12}", ErrorMessage = "Invalid Trainer Code!")]
+        public string TrainerCode { get; set; }
     }
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        //var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        //var user = authState.User;
 
-        if (!user.Identity.IsAuthenticated)
-        {
-            return;
-        }
+        //if (!user.Identity.IsAuthenticated)
+        //{
+        //    return;
+        //}
 
-        //string id = user.Claims.Where(p => p.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Select(p => p.Value).FirstOrDefault();
-        CurrentUser = await UserManager.GetUserAsync(user);
-        Offset = TimeZoneInfo.FindSystemTimeZoneById(CurrentUser.TimeZone).BaseUtcOffset;
+        //CurrentUser = await UserManager.GetUserAsync(user);
+        //Offset = TimeZoneInfo.FindSystemTimeZoneById(CurrentUser.TimeZone).BaseUtcOffset;
         Input.Hatched = DateTime.UtcNow.Add(Offset);
         Input.Hatched = Input.Hatched.AddSeconds(-Input.Hatched.Second);
         Raids = await DbService.GetActiveRaids();
@@ -87,12 +96,18 @@
 
     protected async Task HandleValidSubmit()
     {
+        Input.TrainerCode = RegexHelper.ReplaceWhitespace(Input.TrainerCode);
         Guid guid = Guid.NewGuid();
         var raidBattle = new RaidBattle()
         {
-            Hatched = Input.Hatched.Subtract(Offset), Guid = guid, Host = CurrentUser.PokemonGoNickname,Created = DateTime.UtcNow,
-            HostUserId = CurrentUser.Id,
-            Location = Input.Location ?? CurrentUser.TimeZone,
+            Hatched = Input.Hatched.Subtract(Offset), Guid = guid,
+            //Host = CurrentUser.PokemonGoNickname,
+            Host = Input.PokemonGoNickname,
+            Created = DateTime.UtcNow,
+            //HostUserId = CurrentUser.Id,
+            HostUserId = Input.TrainerCode,
+            //Location = Input.Location ?? CurrentUser.TimeZone,
+            Location = "",
             Active = true,
             Raid = Raids.FirstOrDefault(p => p.Id.ToString() == Input.Pokemon)
         };

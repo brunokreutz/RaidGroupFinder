@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using RaidGroupFinder.Data;
 using RaidGroupFinder.Data.Model;
+using RaidGroupFinder.Helper;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,8 +24,7 @@ namespace BlazorSignalRApp.Server.Hubs
             var chat = new ChatHistory() { Guid = Guid.NewGuid(), Date = DateTime.UtcNow, Group = room, Message = message, User = user };
             if (finish)
             {
-                var splits = user.Split(" |");
-                string name = splits.First();
+                (string name, _) = EncodeHelper.DismemberTrainerTitle(user);
                 chat.User = BOT;
                 chat.Message = $"{name} finished the raid.";
             }
@@ -34,9 +34,7 @@ namespace BlazorSignalRApp.Server.Hubs
 
                 var con = new Connection() { Active = true, ConnectionID = Context.ConnectionId, Room = room, UserId = id };
                 await ChatDbService.AddConnection(con);
-
-                var splits = user.Split(" |");
-                string name = splits.First();
+                (string name, _) = EncodeHelper.DismemberTrainerTitle(user);
                 Context.Items.Add(Context.ConnectionId, (name, room));
 
                 chat.User = BOT;
