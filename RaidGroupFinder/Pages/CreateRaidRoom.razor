@@ -29,11 +29,11 @@
                     <option value="">Select</option>
                     @if (Raids != null)
                     {
-                        @foreach (var option in Raids)
+                    @foreach (var option in Raids)
                         {
-                            <option value="@option.Id.ToString()">
-                                @option.Pokemon.Name
-                            </option>
+                    <option value="@option.Id.ToString()">
+                        @option.Pokemon.Name
+                    </option>
                         }
                     }
                 </InputSelect>
@@ -44,9 +44,11 @@
                 <label> Trainer Code </label>
                 <input type="text" maxlength="14" class="form-control border-bottom-10" @bind="Input.TrainerCode" />
                 @*<label>Location (Optional)</label>
-                <input type="text" maxlength="50" class="form-control border-bottom-10" @bind="Input.Location">*@
-                <button class="ui button btn-primary">Create Raid</button>
+                 <input type="text" maxlength="50" class="form-control border-bottom-10" @bind="Input.Location">*@
+                <label>Save my Information </label>
+                <InputCheckbox @bind-Value="Input.SaveInfo"></InputCheckbox>                
             </div>
+            <button class="ui button btn-primary">Create Raid</button>
         </EditForm>
 
     </div>
@@ -60,6 +62,7 @@
     //private ApplicationUser CurrentUser;
     private TimeSpan Offset;
     private HubConnection hubConnection;
+    private string cookie;
 
     public class InputModel
     {
@@ -74,6 +77,7 @@
         [Required]
         [RegularExpression("[0-9]{4}[ ][0-9]{4}[ ][0-9]{4}|[0-9]{12}", ErrorMessage = "Invalid Trainer Code!")]
         public string TrainerCode { get; set; }
+        public bool SaveInfo { get; set; }
     }
 
     protected override async Task OnInitializedAsync()
@@ -91,10 +95,11 @@
         Input.Hatched = DateTime.UtcNow.Add(Offset);
         Input.Hatched = Input.Hatched.AddSeconds(-Input.Hatched.Second);
         Raids = await DbService.GetActiveRaids();
-        var cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.GetCookie");
+        cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.GetCookie");
         if (cookie != "" && cookie != null)
         {
             (Input.PokemonGoNickname, Input.TrainerCode) = EncodeHelper.DismemberTrainerTitle(EncodeHelper.DecodeFrom64(cookie));
+            Input.SaveInfo = true;
         }
         StateHasChanged();
     }
@@ -116,6 +121,10 @@
                 Active = true,
                 Raid = Raids.FirstOrDefault(p => p.Id.ToString() == Input.Pokemon)
             };
+            if (Input.SaveInfo && cookie == "" || cookie == null)
+            {
+                await JSRuntime.InvokeAsync<string>("blazorExtensions.WriteCookie", EncodeHelper.EncodeTo64(EncodeHelper.CreateTrainerTitle(Input.PokemonGoNickname, Input.TrainerCode)), 365);
+            }
             await DbService.CreateRaidBattle(raidBattle);
 
             hubConnection = new HubConnectionBuilder()
